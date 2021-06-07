@@ -1,0 +1,2 @@
+rootProject.name = "FineWms"
+include ':app'
