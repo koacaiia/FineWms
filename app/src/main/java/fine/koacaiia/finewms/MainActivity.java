@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         depotName="Incargo2";
         list=new ArrayList<>();
         getIncargoData();
+        adapter=new IncargoListAdapter(list);
     }
 
     private void getIncargoData() {
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 for(DataSnapshot data:snapshot.getChildren()){
                     IncargoList mList=data.getValue(IncargoList.class);
 
-                    Log.i("duatjsrb","consignee Value"+mList.getConsignee()+list.size());
+                    Log.i("duatjsrb","consignee Value"+mList.getConsignee());
                 }
 
             }
