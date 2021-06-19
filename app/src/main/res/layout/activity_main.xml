@@ -104,6 +104,7 @@
                     android:layout_margin="3dp"
                     android:text="근태등록"/>
                 <Button
+                    android:id="@+id/main_init"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"

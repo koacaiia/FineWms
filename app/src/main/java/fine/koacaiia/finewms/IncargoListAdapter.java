@@ -38,7 +38,7 @@ public class IncargoListAdapter extends RecyclerView.Adapter<IncargoListAdapter.
     @NotNull
     @Override
     public ListViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
-        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.incargolist,parent,false);
+        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.list_incargo,parent,false);
 
         return new ListViewHolder(view);
     }
