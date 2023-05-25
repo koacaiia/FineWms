@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>WEB1-HTML</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        #content{
+            border:5px solid gray;
+            display:grid;
+            grid-template-columns:1fr 1fr;
+        }
+        body {
+            border-top:5px solid gray;
+        }
+        div {
+            margin:5px;
+            border:5px solid red;
+
+        }
+        @media(max-width:800px){
+            #content{
+                border:5px solid black;
+                display:grid;
+                grid-template-columns:none;
+                grid-template-rows:1fr 1fr;
+            }
+            h1{
+                font-size:50px
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>WEB</h1>
+    <div id="content">
+        <div>
+            <ol>
+                <li>HTML</li>
+                <li>CSS</li>
+                <li>JavaScript</li>
+            </ol>    
+        </div>
+        <div>
+            <h1>CSS란 무엇인가?</h1>
+            <h5>Css</h5>
+                Cascading Style Sheets<a href="https://en.wikipedia.org/wiki/Cadcading_Style_Sheets">(CSS)</a> is a style sheet language<br>
+                used for describing the persentation of a document written in a markup language.
+        </div>
+            
+    </div>
+    
+</body>
+</html>

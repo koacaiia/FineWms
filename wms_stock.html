@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    <title>StockReport</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <link href="./datepicker/css/datepicker.min.css" rel="stylesheet" type="text/css" media="all">
+    <!-- Air datepicker css -->
+    <script src="./datepicker/js/datepicker.js"></script> <!-- Air datepicker js -->
+    <script src="./datepicker/js/datepicker.ko.js"></script> <!-- 달력 한글 추가를 위해 커스텀 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="wms_stock.css" type="text/css">
+    
+</head>
+<body>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script> 
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-messaging.js"></script>      
+    <script >        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
+            authDomain: "finecargoinformation.firebaseapp.com",
+            databaseURL: "https://finecargoinformation-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "finecargoinformation",
+            storageBucket: "finecargoinformation.appspot.com",
+            messagingSenderId: "562937971880",
+            appId: "1:562937971880:web:98fb4152608485d72eae9d",
+            measurementId: "G-27CHK5X1W5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var database_f = firebase.database();
+        const messaging = firebase.messaging();
+        
+    </script>
+    
+    <div class ="tableMain">
+    <div id="table">
+        <div id="info">
+                <div id="infoTitle">
+                    <h6  id="depot_s"></h6>
+                    <h6  id="title"></h6>
+                    <h6  id="consignor"></h6>
+                    <h6  id="date"></h6>
+                    <script>
+                        var today = new Date();
+                        var month = today.getMonth()+1;
+                        if (month <10){
+                            month ="0"+month;
+                        }
+                        var day = today.getDate();
+                        if(day <10){
+                            day = "0"+day
+                        }
+                        var date =today.getFullYear()+"-"+month+"-"+day;
+                        var title = document.getElementById('title');
+                        var clientName =  JSON.parse(localStorage.getItem("BasicData"))["client"];
+                        title.innerText = clientName;
+                        var deptName = JSON.parse(localStorage.getItem("BasicData"))["dept"];
+                        var consignorName= JSON.parse(localStorage.getItem("BasicData"))["consignor"];
+                        document.getElementById("depot_s").innerHTML=deptName;
+                        document.getElementById("date").innerHTML=date;
+                        document.getElementById("consignor").innerHTML=consignorName;       
+                    </script>
+                    <div class="infoResult">
+                        <h6 id="stock_case">총재고 건수:</h6>
+                        <h6 id="stock_total_qty">총재고 수량:</h6>
+                        <h6 id="stock_total_pty">총 재고 팔렛트 수량:</h6>
+                    </div>
+                    <button id="btn_excelwrite" onclick="btn_excelwrite()">Excel 파일생성</button>
+                </div>
+                
+            <div id="table_div" class="table_container">
+
+            </div>     
+           
+                   
+        </div>
+        
+        <div id="result">
+            
+            <div id="outcargotitle">
+                <div class="resultDiv">
+                        <input  type="button"  value="출고일" id="out_date"/>   
+                        <script>
+                            function transDate(dateT){
+                                let result_month = dateT.getMonth()+1;
+                                let result_day =dateT.getDate();
+                                if(result_month<10){
+                                    result_month ="0"+result_month;
+                                };
+                                if(result_day <10){
+                                    result_day = "0"+result_day;
+                                };
+                                var result_date = dateT.getFullYear()+"-"+result_month+"-"+result_day;
+                                return result_date;
+                            }
+                            document.getElementById("out_date").value =transDate(new Date());
+                            $("#out_date").datepicker({
+                                language: 'ko'
+                            });
+                        </script>    
+                </div>
+                <div class="result_title">
+                    <div class="resultDiv">
+                        <h4 >화주명</h4>
+                    </div>
+                    <div class="resultDiv">
+                        <input type="input" id = "out_consignee" class = "result_title_input" />
+                    <script>
+                        document.getElementById("out_consignee").value = consignorName;
+                    </script>  
+                    </div>    
+                </div>
+                <div class="result_title">
+                    <div class="resultDiv">
+                        <h4 >출고처</h4>
+                    </div>
+                    <div class="resultDiv">
+                        <input type="input" id = "out_destination"  class = "result_title_input"/>
+                    </div>                   
+                </div>
+                <div class="result_title">
+                    <div class="resultDiv">
+                        <h4 >출고<br>수량</h4>
+                    </div>
+                    <div class="resultDiv">
+                        <input type="input" id="out_qty" value=0 class = "result_title_input"/>
+                    </div>                    
+                </div>
+                <div class="result_title">
+                    <div class="resultDiv">
+                        <h4  id="outPqty" >출고<br> 팔렛트<br> 수량</h4>
+                    </div>
+                    <div class="resultDiv">
+                        <input type="input" id="out_pqty" value=0  class = "result_title_input"/>
+                    </div>
+                </div>
+                <div class="result_titleA">
+                    <label for="out_attachment" class="upLoadLabel">
+                        <div class="btn_upload">첨부파일 등록</div>
+                    </label>
+                        <input type="file" id="out_attachment" value="첨부파일"  class = "result_title_input" onchange="outcargo_attachment()" multiple/>
+                    <label class="resultDiv" id="file_names">File Names</label>
+                    <input  class="resultDiv" type="button" id="out_attachment_del" value="파일초기화" onclick="outcargo_attachmentDel()">    
+                </div>
+                <div class="resultDiv">
+                   
+                        <button class="resultDiv" id ="out_submit"  onclick="outcargo_submit();">출고요청<br>등록</button>                  
+                    
+                </div>
+                
+            </div>
+            <div class="table_container" id="result1">
+                <table id = "results">
+                    <thead>
+                        <tr>
+                            <th>반입일</th>
+                            <th>BL</th>
+                            <th>품목</th>
+                            <th>세부품목</th>
+                            <th>출고요청수량(EA)</th>
+                            <th>출고요청수량(PLT)</th>
+                            <th>출고요청사항</th>
+                            <th>항목확인</th>
+                            <th>항목삭제</th>
+                            <th>출고후 출고가능수량(EA)</th>
+                            <th>출고후 출고가능수량(PLT)</th>
+                            <th>출고후 총재고(EA)</th>
+                            <th>출고후 총재고(PLT)</th>
+                            <th>팔렛트적재수량</th>
+                            <th>비고</th>
+                        </tr>
+                    </thead>
+    
+                </table>
+            </div>
+           
+        </div>
+        </div>
+        <div class="stockMain">
+                <div class="outcargoResultTitle">
+                    
+                    <div class="outcargoDate">
+                        <div class="outcargoDateS">
+                            <input type="button" value="시작일" id="date_picker1" />
+                        </div>
+                        
+                        <div class="outcargoDateS">
+                            <input type="button" value="종료일" id="date_picker2" >
+                        </div>
+                        <div class="outcargoDateS">
+                            <input type="button" id="date_count" value="출고현황 검색" onclick="get_datecount()"/>
+                        </div>
+                        <div class="data_delD">
+                            <button id="data_del" onclick="outdataDel();">선택항목 삭제
+
+                            </button>                        
+                        </div>
+                        <div class="data_delD">
+                            <button id="data_trans" onclick="outdataTrans();">세부내역 창전환
+
+                            </button>                        
+                        </div>
+                        <script>
+                            document.getElementById("date_picker1").value=transDate(new Date());
+                            document.getElementById("date_picker2").value=transDate(new Date());
+                            $("#date_picker1").datepicker({
+                                language: 'ko'
+                            });
+                            $("#date_picker2").datepicker({
+                                language: 'ko'
+                            });
+                            function get_datecount(){
+                                total_outcargo_count=0;
+                                total_outcargo_qty=0;
+                                total_outcargo_pty=0;
+                                const tBodyEle= document.getElementById("outcargo_tbody");
+                                if(tBodyEle != null){
+                                    tBodyEle.remove();
+                                }
+                                const tBodyCreate = document.createElement("tbody");
+                                tBodyCreate.id="outcargo_tbody";
+                                document.getElementById("outcargo_results").appendChild(tBodyCreate);
+                                sDate = new Date(document.getElementById("date_picker1").value);
+                                eDate = new Date(document.getElementById("date_picker2").value);
+                                var curDate = sDate;
+                                const countDateList = []
+                                while(curDate<=eDate){
+                                    countDateList.push(transDate(curDate));
+                                    curDate.setDate(curDate.getDate() +1)
+                                }
+                                for(let dateC in countDateList){
+                                    getOutcargoResult(countDateList[dateC]);
+                                }
+
+                            }
+                        </script>    
+                    </div>
+                    <div class="infoResult">
+                        <h6 id="outcargo_case">총출고 건수:</h6><h6 id="outcargo_qty">총출고 수량:</h6><h6 id="outcargo_pty">총출고 팔렛트 수량:</h6>
+                    </div>
+                     
+                </div>
+                <div class="outcargoResult">
+                    <table class="outcargoResultBtr"id = "outcargo_results">
+                        <thead>
+                            <tr >
+                                <th>화주명</th>
+                                <th>출고일</th>
+                                <th>출고처</th>
+                                <th>출고요청수량(EA)</th>
+                                <th>출고요청수량(PLT)</th>
+                                <th>출고요청사항</th> 
+                                <th>첨부파일</th>                               
+                            </tr>
+                        </thead>
+                        <tbody id="outcargo_tbody">
+
+                        </tbody>
+                    </table>
+                </div>
+            
+        </div>
+    </div>
+       
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+        <script >
+            sendMessage();
+            var hiddenRefPath;
+            var fileNames=[];
+            let total_outcargo_count=0;
+            let total_outcargo_qty=0;
+            let total_outcargo_pty=0;
+            let table = document.createElement('table');
+            table.id = "table_data";
+            table.setAttribute("class","tableData");
+            table.addEventListener("click", (event) => {
+                if (event.target.tagName === "TD") {
+                  const row = event.target.parentNode;
+                  const confirm_message = "BL: "+row.cells[1].innerHTML+"\n"+"품명: "+row.cells[2].innerHTML+"\n"+"화물에 대한 출고등록을 진행 하시겠습니까?";
+                  const confirm_check = confirm(confirm_message);
+                  if(confirm_check){
+                  row.classList.toggle("confirm");                    
+                  var clicked_tr = document.createElement("tr");
+                  result_tbody.appendChild(clicked_tr);
+                  let clicked_td = null;
+                  let currentStock = parseInt(row.cells[7].innerHTML.replace(/[^0-9]/g,''));
+                  let currentPty = parseInt(row.cells[8].innerHTML.replace(/[^0-9]/g,''));
+                  if(isNaN(currentStock)){
+                    currentStock=0;} 
+                  if(isNaN(currentPty)){
+                    currentPty=0;}                                    
+                  let totalStock = parseInt(row.cells[9].innerHTML.replace(/[^0-9]/g,''));
+                  let totalPty = parseInt(row.cells[10].innerHTML.replace(/[^0-9]/g,''));
+                  if(isNaN(totalStock)){
+                    totalStock=0;} 
+                  if(isNaN(totalPty)){
+                    totalPty=0;}
+                  const stock_arr = [currentStock,currentPty,totalStock,totalPty];
+                  let loadQty = parseInt(row.cells[11].innerHTML.replace(/[^0-9]/g,''));
+                  const remark_info = row.cells[12].innerHTML;
+                  clicked_tr.id=row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML;
+                  console.log("cS:"+currentStock+"cP:"+currentPty+"lQ:"+loadQty); 
+                  for(var reV =0; reV<4;reV++){
+                    clicked_td = document.createElement("td");                    
+                    clicked_td.innerHTML = row.cells[reV].innerHTML;
+                    clicked_tr.appendChild(clicked_td);
+                  }
+                  var input_list = [currentStock,currentPty,""];
+                  for(var inC = 0; inC<5;inC++){
+                    qtyValue = currentStock;
+                    ptyValue = currentPty;
+                    clicked_td = document.createElement("td");
+                    clicked_td.value = input_list[inC];
+                    if(inC<3){
+                        const input_td = document.createElement("input");
+                        //input_td.onFocus=function() {
+                          //  alert("Input element has received focus!");
+                          //};
+                        if(inC==0){
+                            input_td.setAttribute("class","inputTdQty");
+                        }else if(inC==1){
+                            input_td.setAttribute("class","inputTdPty");
+                        }else{
+                            input_td.setAttribute("class","inputTdRemark")
+                        }                    
+                        input_td.addEventListener("change",(event)=>{
+                        const input_row = event.target.parentNode.parentNode;
+                        console.log("input_td Clicked"+input_row);
+                        /*const nodeC = event.target.parentNode;
+                        const indexCl =Array.from(input_row).indexOf(event.target.parentNode);*/
+                        const targetClassName =event.target.className;
+                        if(targetClassName=="inputTdQty"){
+                            const qtyValue = input_row.getElementsByTagName("input")[0].value;
+                            const aQtyValue = input_row.getElementsByTagName("td")[9].innerHTML;
+                            const aPtyValue = input_row.getElementsByTagName("td")[10].innerHTML;
+
+                            const ptyValue = qtyValue/loadQty;
+                            if(!Number.isInteger(ptyValue)){
+                                alert("출고요청 팔렛트 수량이 "+ptyValue+ "로 확인됩니다.정확한 수량 기입후 전송 바랍니다.")
+                            }
+                            input_row.getElementsByTagName("input")[1].value=ptyValue;
+                        }                   
+                    });                   
+                    input_td.value = input_list[inC];
+                    clicked_td.appendChild(input_td);
+                    }                    
+                    if(inC ==3){
+                        const input_btn = document.createElement("button");
+                        input_btn.addEventListener("click",(event) => {
+                            if (event.target.tagName === "BUTTON") {
+                              const select_row = event.target.parentNode.parentNode;
+                              const outQty = document.getElementById("out_qty");
+                              const outPty = document.getElementById("out_pqty");
+                              qtyValue = parseInt(select_row.getElementsByTagName("input")[0].value);
+                              ptyValue = parseInt(select_row.getElementsByTagName("input")[1].value);
+                              clicked_tr.classList.toggle("confirm");
+                              if(clicked_tr.className =="confirm"){
+                                outQty.value = parseInt(outQty.value)+parseInt(qtyValue);  
+                                outPty.value = parseInt(outPty.value)+parseInt(ptyValue);
+                                clicked_tr.cells[9].innerHTML = select_row.cells[9].innerHTML-qtyValue;clicked_tr.cells[10].innerHTML = select_row.cells[10].innerHTML -ptyValue;
+                                clicked_tr.cells[11].innerHTML = select_row.cells[11].innerHTML - qtyValue;
+                                clicked_tr.cells[12].innerHTML = select_row.cells[12].innerHTML - ptyValue;
+                                const aQty = parseInt(clicked_tr.cells[9].innerHTML);
+                                if(aQty<0){
+                                    const oQtyCheck=alert("출고 요청수량이 출고가능 수량을"+aQty +"초과했습니다!!."+"\n"+"출고 요청사항에 출고관련 세부사항 기입후 전송 바랍니다.");
+                                }
+                              }else{
+                                outQty.value = parseInt(outQty.value)-parseInt(qtyValue);  
+                                outPty.value = parseInt(outPty.value)-parseInt(ptyValue);
+                                clicked_tr.cells[9].innerHTML = parseInt(select_row.cells[9].innerHTML)+parseInt(qtyValue);
+                                clicked_tr.cells[10].innerHTML = parseInt(select_row.cells[10].innerHTML)+parseInt(ptyValue);
+                                clicked_tr.cells[11].innerHTML = parseInt(select_row.cells[11].innerHTML)+ qtyValue;
+                                clicked_tr.cells[12].innerHTML = parseInt(select_row.cells[12].innerHTML)+ parseInt(ptyValue);
+                              }
+                              
+                              }});
+                        input_btn.innerHTML="확인";
+                        input_btn.style.fontFamily="Helvetica Neue"
+                        input_btn.style.fontWeight="bold"
+                        //input_btn.style.height ="2vh"
+                        input_btn.style.fontSize ="0.1px"
+                        clicked_td.appendChild(input_btn);}
+                        if(inC==4){
+                        var input_rowdelete = document.createElement("button");
+                        input_rowdelete.innerHTML = "삭제";
+                        input_rowdelete.style.fontFamily="Helvetica Neue"
+                        input_rowdelete.style.fontWeight="bold"
+                        input_rowdelete.style.fontSize ="0.1px"
+                        //input_rowdelete.style.height ="2vh"
+                        input_rowdelete.addEventListener("click",(event)=>{
+                            if (event.target.tagName === "BUTTON") {
+                                const delete_row = event.target.parentNode.parentNode;
+                                const confirm_delete = confirm("BL: "+delete_row.cells[1].innerHTML+"\n품명: "+delete_row.cells[2].innerHTML+"\n"+"출고등록 내용 삭제 하시겠습니까?");
+                                if(confirm_delete){
+                                    if(clicked_tr.className =="confirm"){
+                                        const outQty = document.getElementById("out_qty");
+                                        const outPty = document.getElementById("out_pqty");
+                                        qtyValue = delete_row.getElementsByTagName("input")[0].value;
+                                        ptyValue = delete_row.getElementsByTagName("input")[1].value;
+                                        outQty.value = parseInt(outQty.value)-parseInt(qtyValue);  
+                                        outPty.value = parseInt(outPty.value)-parseInt(ptyValue);
+                                      }
+                                    delete_row.parentNode.removeChild(delete_row);
+                                }
+                            }
+                        });
+                        clicked_td.appendChild(input_rowdelete);
+                    }                  
+                    clicked_tr.appendChild(clicked_td);                    
+                  }
+                  for(var tdC =0;tdC<5;tdC++){
+                    if(tdC ==4){
+                    const clicked_load = document.createElement("td");   
+                    clicked_load.innerHTML=loadQty;
+                    clicked_tr.appendChild(clicked_load);
+                    clicked_td = document.createElement("td");
+                    clicked_td.innerHTML=remark_info;                   
+                    clicked_tr.appendChild(clicked_td);
+                    clicked_tdRefS = document.createElement("td");
+                    const refs = "DeptName/"+
+                    deptName+"/ConsignorValue/"+clientName+"/"+consignorName+"/"+"StockReport/"+row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML;
+                    clicked_tdRefS.innerHTML=refs;
+                    clicked_tdRefS.setAttribute("class","hidden");
+                    clicked_tr.appendChild(clicked_tdRefS);   
+                    }else{
+                    clicked_td = document.createElement("td");
+                    clicked_td.innerHTML=stock_arr[tdC];                    
+                    clicked_tr.appendChild(clicked_td);                        
+                    }                    
+                  }
+                }else if(row.classList=="confirm"){
+                    row.classList.toggle("confirm");
+                }                
+                }
+              });
+            let thead = document.createElement('thead');
+            let tbody = document.createElement('tbody');
+            tbody.setAttribute("id","table_container");
+            table.appendChild(thead);
+            table.appendChild(tbody);
+
+            document.getElementById('table_div').appendChild(table);
+
+            result_table= document.getElementById('results');
+            let result_thead = document.createElement('thead');
+            let result_tbody = document.createElement('tbody');
+            result_table.appendChild(result_tbody);
+
+            document.getElementById('result1').appendChild(result_table);
+            var clicked_info = [];
+            var clicked_item = new Array();
+            const refValue = database_f.ref("DeptName/"+
+            deptName+"/ConsignorValue/"+clientName+"/"+consignorName+"/StockReport/");
+            var ref_arr = new Array();
+            refValue.get().then((snapshot)=>{
+                const value = Object.values(snapshot.val());
+                const key = Object.keys(snapshot.val());
+                const key_inner = Object.keys(value[0]);
+                const head_tr =document.createElement('tr');
+                const head_title =["반입일","BL","품목","세부품목","반입수량(EA)","반입수량(PLT)","부족수량(SHORTAGE)_EA","출고가능수량(EA)","출고가능수량(PLT)","총재고수량(EA)","총재고수량(PLT)","적재수량(PLT당)","비고"];
+                let totalCase = 0;
+                let totalQty = 0;
+                let totalPty = 0;
+                for(var key_iC =0; key_iC<head_title.length;key_iC++){
+                    const head_th = document.createElement("th");
+                    head_th.setAttribute("class", "sticky");
+                    if(key_iC>6){
+                        head_th.style.width="5vw";
+                    }
+                    head_th.innerHTML = head_title[key_iC];
+                    head_tr.appendChild(head_th);
+                }
+                thead.appendChild(head_tr);
+                for(var refC =0;refC<value.length;refC++){
+                    const body_tr= document.createElement('tr');
+                    let total_ea;
+                    let total_plt;
+                    if( typeof value[refC]["총재고수량(EA)"]=="string"){
+                        total_ea = parseInt(value[refC]["총재고수량(EA)"].replace(/[^0-9]/g,''));
+                        total_plt = parseInt(value[refC]["총재고수량(PLT)"].replace(/[^0-9]/g,''));
+                    }
+                        if(isNaN(total_ea)){
+                            total_ea =0;
+                        };
+                        if(isNaN(total_plt)){
+                            total_plt =0;
+                        }
+                        totalQty = totalQty+total_ea;
+                        totalPty = totalPty+total_plt;
+                    for(var titleC =0;titleC<head_title.length;titleC++){
+                        const title_set = value[refC][head_title[titleC]];
+                        const body_td = document.createElement("td");
+                        body_td.innerHTML = title_set;
+                        body_tr.appendChild(body_td);
+                    }
+                    tbody.appendChild(body_tr);    
+                };
+                document.getElementById("stock_case").innerHTML = "총재고 건수: "+value.length+" 건";
+                document.getElementById("stock_total_qty").innerHTML ="총재고 수량: "+ totalQty+" EA";
+                document.getElementById("stock_total_pty").innerHTML ="총 재고 팔렛트 수량: "+totalPty+" PLT";
+                               
+            });
+            
+
+            function outcargo_submit(){
+                
+                const now =new Date();
+                const reg_time = now.getHours()+"시"+now.getMinutes()+"분"+now.getSeconds()+"초";
+                const date = document.getElementById("out_date").value;
+                const destination = document.getElementById("out_destination").value;
+                const qty = document.getElementById("out_qty").value;
+                const pqty = document.getElementById("out_pqty").value;
+                const result_table = document.getElementById("results");
+                const result_table_rowsCount = result_table.rows.length-1;
+                const outcargo_data = [date,clientName,destination,qty,pqty];
+                const outcargo_ref = reg_time+"_"+clientName+"_"+consignorName+"_"+destination+"_"+qty+"(EA)_"+pqty+"(PLT)";
+                var outcargo_info = new Array();
+                var outcargo_remark = ""
+                
+                for(var i =1;i<=result_table_rowsCount;i++ ){
+                    if(result_table.rows[i].className !="confirm"){
+                        alert(i+" 열 출고내용 확인 이 안되었습니다.확인후 진행 바랍니다.!!")
+                        break; }
+                    const ref_value = result_table.rows[i].id;
+                    const row_count=result_table.rows[i].childElementCount;
+                    const row_info = [];
+                    const input_info = result_table.rows[i].getElementsByTagName("input");
+                    const input_td = result_table.rows[i].getElementsByTagName("td");
+                    const row_qty = input_info[0].value;
+                    const row_pty = input_info[1].value;
+                    const row_remark = input_info[2].value;
+                    const row_date = result_table.rows[i].cells[0].innerHTML;
+                    const row_bl = result_table.rows[i].cells[1].innerHTML;
+                    const row_description = result_table.rows[i].cells[2].innerHTML;
+                    const row_lot = result_table.rows[i].cells[3].innerHTML;
+                    if (row_remark !== null||row_remark !==""){
+                        if(outcargo_remark ===""){
+                            outcargo_remark = row_remark;
+                        }else{
+                            outcargo_remark= outcargo_remark+","+row_remark;
+                        }  
+                    }
+                    const refPath ="DeptName/"+deptName+"/OutCargoReport/"+date+"/"+outcargo_ref;        
+                    const put_data ={"출고일":date,"화주명":consignorName,"출고처":destination,"출고요청수량(EA)":row_qty,"출고요청수량(PLT)":row_pty,"출고요청사항":row_remark,"출고후 출고가능수량(EA)":input_td[9].innerHTML,"출고후 출고가능수량(PLT)":input_td[10].innerHTML,"출고후 총재고(EA)":input_td[11].innerHTML,"출고후 총재고(PLT)":input_td[12].innerHTML,"반입일":row_date,"BL":row_bl,"품명":row_description,"refPath":refPath+"/Content/"+ref_value,"Process":"Holding","Lot":row_lot,"refS":input_td[15].innerHTML,"Admin":clientName};
+                    database_f.ref(refPath+"/Content/"+ref_value).set(put_data)
+                    .then(() => {
+                        console.log("Object uploaded successfully!");
+                    })
+                    .catch((error) => {
+                        console.error("Error uploading object: ", error);
+                    });
+                    if(i==result_table_rowsCount){                                                                   
+                    const put_info = {"화주명":consignorName,"출고일":date,"출고처":destination,"출고요청수량(EA)":qty,"출고요청수량(PLT)":pqty,"출고요청사항":outcargo_remark,"Process":"Holding","Admin":clientName,"refI":"DeptName/"+deptName+"/OutCargoReport/"+date+"/"+outcargo_ref};
+                    database_f.ref(refPath+"/Info/").set(put_info)
+                        .then(() => {
+                            console.log("Object uploaded successfully!");
+                        })
+                        .catch((error) => {
+                            console.error("Error uploading object: ", error);
+                        });
+                        result_table.removeChild(result_tbody); 
+                        const reset_table=document.getElementById("results");
+                        result_tbody = document.createElement("tbody");
+                        reset_table.appendChild(result_tbody);
+                        const confirmRow =document.querySelectorAll(".confirm");
+                        for(var aC=0;aC<fileNames.length;aC++){
+                            const storageRef =firebase.storage().ref();
+                            const fileRef = storageRef.child(refPath+"/Attachment/"+fileNames[aC].name);
+                            fileRef.put(fileNames[aC])
+                            .then(() => {
+                                console.log("Attach uploaded successfully!");
+                            })
+                            .catch((error) => {
+                                console.error("Attach uploading object: ", error);
+                            });;
+                        };
+                        for(var confirmCount=0;confirmCount< confirmRow.length;confirmCount++){
+                            confirmRow[confirmCount].classList.toggle("confirm");
+                        };
+                        
+                    }
+                };
+                if(document.getElementById("outcargo_tbody")!=null){
+                    document.getElementById("outcargo_tbody").replaceChildren();
+                }
+                document.getElementById("out_qty").value=0;
+                document.getElementById("out_pqty").value=0;
+                document.getElementById("out_destination").value="";
+                outcargo_attachmentDel();
+                getOutcargoResult(date); 
+                };
+                getOutcargoResult(date);    
+                
+            function getOutcargoResult(date){
+                const refString="DeptName/"+deptName+"/OutCargoReport/"+date+"/";
+                const refData=database_f.ref(refString);
+                refData.get().then((snapshot)=>{
+                    if(snapshot.val()===null){
+                        //alert(date+" 기간내 출고등록 건수 없습니다.");
+                        return;
+                    }
+                    const valueS = Object.values(snapshot.val());
+                    const info_table = document.getElementById("outcargo_results");
+                    const info_tbody = document.getElementById("outcargo_tbody");
+                    for(var sC =0; sC<valueS.length;sC++){
+                        const keyRef = Object.keys(snapshot.val())[sC];
+                        const valueI = valueS[sC]["Info"];
+                        const refC = valueS[sC]["rePath"];
+                        const infoConsignor = valueI["화주명"]
+                        const infoDate = valueI["출고일"];
+                        const infoRemark = valueI["출고요청사항"];
+                        const infoQty = valueI["출고요청수량(EA)"];
+                        const infoDestination = valueI["출고처"];
+                        const infoPty = valueI["출고요청수량(PLT)"];
+                        const infoAdmin = valueI["Admin"];
+                        const infoProcess = valueI["Process"];
+                        const infoData =[infoConsignor,infoDate,infoDestination,infoQty,infoPty,infoRemark];
+                        
+                        if(infoDate == date && infoConsignor==consignorName){
+                            
+                            total_outcargo_qty=parseInt(total_outcargo_qty+parseInt(infoQty));
+                            total_outcargo_pty=parseInt(total_outcargo_pty+parseInt(infoPty));                            
+                            const info_row = document.createElement("tr");
+                            if(infoProcess =="Completion"){
+                                info_row.style.background="#FF9999";
+                            } 
+                            const valueC = Object.values(valueS[sC]["Content"]);
+                            const sub_thL =["반입일","품명","BL","출고요청수량(EA)","출고요청수량(PLT)","출고요청사항"];                                
+                            const sub_htr = document.createElement("tr");
+                            for(iC =0; iC<infoData.length; iC++){
+                                const info_td = document.createElement("td");
+                                //info_td.appendChild(info_row);                               
+                                info_td.innerHTML= infoData[iC];
+                                info_row.appendChild(info_td);
+                            }
+                            const attachRef =firebase.storage().ref(refString+keyRef+"/Attachment/");
+                            attachRef.listAll().then((res) => {
+                                let attS = "";
+                                res.items.forEach((itemRef) => {
+                                attS=attS+itemRef.name+",";
+                                });
+                                const att_td = document.createElement("td");
+                                //att_td.appendChild(info_row);
+                                att_td.innerHTML=attS.slice(0,-1);
+                                info_row.appendChild(att_td)
+                            }).catch((error) => {
+                            console.log(error);
+                            });
+                            const td =document.createElement("td");
+                            td.innerHTML=Object.keys(snapshot.val())[sC];
+                            td.setAttribute("class","hidden");
+                            info_row.appendChild(td);
+                            
+                            info_tbody.appendChild(info_row);
+                            let sub_table = document.createElement("table");
+                            sub_table.setAttribute("class","subDiv");
+                            sub_table.style.width=(info_row.clientWidth*0.95)+"px";
+                            let sub_thead = document.createElement("thead");
+                            
+                            for(var thC=0;thC<sub_thL.length;thC++){
+                                let sub_th = document.createElement("th"); 
+                                sub_th.innerHTML = sub_thL[thC];
+                                sub_htr.appendChild(sub_th);
+                            };
+                            let sub_tbody = document.createElement("tbody");
+
+                            for(var trC=0;trC<valueC.length;trC++){
+                                let sub_tr =document.createElement("tr");
+                                for(var tdC=0;tdC<sub_thL.length;tdC++){
+                                    let sub_td = document.createElement("td");
+                                    sub_td.innerHTML = valueC[trC][sub_thL[tdC]];
+                                    sub_tr.appendChild(sub_td);
+                                }
+                                
+                                sub_tbody.appendChild(sub_tr);
+                            }
+                            sub_thead.appendChild(sub_htr);
+                            sub_table.appendChild(sub_thead);
+                            sub_table.appendChild(sub_tbody);
+                            info_tbody.appendChild(sub_table);
+                            info_row.addEventListener("click",(event)=>{
+                                const rowevent = event.target.parentNode;
+                                rowevent.classList.toggle("confirm");
+                                const rowIdx =rowevent.rowIndex-1;
+                                const parentEvent = rowevent.parentNode;
+                                const dataO=rowevent.cells[1].innerHTML;
+                                const tableIdx = parentEvent.getElementsByTagName("table")[rowIdx];
+                                console.log("rowIdx:"+rowIdx+"\n"+"parentEvent:"+parentEvent+"\n"+"dataOvalue:"+dataO+tableIdx);
+                                tableIdx.classList.toggle("active");
+                                hiddenRefPath=dataO+"/"+rowevent.cells[6].innerHTML;;
+                            });                             
+                            total_outcargo_count = total_outcargo_count+1
+                        }                         
+                    }
+                    document.getElementById("outcargo_case").innerHTML = "출고 건수:"+total_outcargo_count+" 건";
+                    document.getElementById("outcargo_qty").innerHTML = "총출고 수량:"+total_outcargo_qty+" (EA)";
+                    document.getElementById("outcargo_pty").innerHTML ="총출고 팔렛트수량:"+total_outcargo_pty+" (PLT)";
+                })
+            };
+            function outcargo_attachment(){
+                const fileInput = document.getElementById("out_attachment");
+                const file = fileInput.files;
+                console.log(file);
+                const fileL=Object.keys(file).length;
+                let fileN ="";
+                for(var fileC=0 ; fileC<fileL;fileC++){
+                    fileNames.push(file[fileC])
+                    if(fileC==fileL-1){
+                        fileN = fileN+file[fileC].name;
+                    }else{
+                        fileN = fileN+file[fileC].name+",";
+                    }
+                }
+                console.log('btn file upload fileNams Value:'+fileNames);
+                const labelFilename = document.getElementById("file_names");
+                labelFilename.innerHTML = fileN;
+                /*const storageRef =firebase.storage().ref();;
+                const fileRef = storageRef.child("test/"+file.name);
+                fileRef.put(file).then(function(snapshot){
+                    console.log(snapshot.val);
+                })*/
+            };
+            function outcargo_attachmentDel(){
+                fileNames=[];
+                const fileEle=document.getElementById("file_names");
+                fileEle.innerHTML="File Names";
+                document.getElementById("out_attachment").value="";
+               
+                
+            }
+            function btn_excelwrite(){
+                    const fileName = dept+"_"+date+"_"+clientName+" 재고목록.xlsx";
+                    const wb = XLSX.utils.table_to_book(document.getElementById('table_data'), {sheet:"test",raw:true});
+                    XLSX.writeFile(wb, (fileName));
+                  } 
+            function outdataDel(){
+                const delConfirm = confirm(hiddenRefPath+"\n"+"출고요청 자료를 삭제 하시겠습니까?");
+                if(delConfirm){
+                    const delPath=database_f.ref("DeptName/"+dept+"/OutCargoReport/"+hiddenRefPath);
+                    delPath.remove().then(function() {
+                        console.log("Child가 성공적으로 삭제되었습니다.");
+                      })
+                      .catch(function(error) {
+                        console.error("Child 삭제 중 오류가 발생했습니다.", error);
+                      });
+                      const tbody= document.getElementById("outcargo_tbody");
+                      tbody.remove();
+                      get_datecount(); 
+                }   
+            }
+            function outdataTrans(){
+                const dateS = document.getElementById("date_picker1").value;
+                const dateE = document.getElementById("date_picker2").value;
+                const dataInfo ={"dept":deptName,"client":clientName,"dateS":dateS,"dateE":dateE,"consignor":consignorName};
+                localStorage.setItem("BasicData",JSON.stringify(dataInfo));
+                window.open("wms_outcargoReport.html");
+            }
+            function sendMessage(){
+                messaging.onMessage((payload)=>{
+                    console.log("message received");
+                });
+                console.log(messaging);
+                messaging.requestPermission().then(function(){
+                    console.log("Get Messaging Auth");
+                    return messaging.getToken();
+                })
+                .then(function(token){
+                    console.log("Fcm Token:",token);
+                    
+                })
+                .catch(function(e){
+                    console.log("Occured Error In Get Messaing Auth",e);
+                });
+            }
+
+           
+        </script>
+       
+        
+</body>    
+</html>

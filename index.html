@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main</title>
+    <style>
+        #main{
+            width:50vw;
+            height:95vh;
+            display:grid;
+            grid-template-rows:2fr 3fr 5fr 1.5fr;
+            margin:0 auto;
+            margin-top:1vh;
+            grid-gap:1vh;
+        }
+        #client{
+            display:grid;
+            grid-template-rows: 1fr 1fr 1fr;
+            border:2px groove black;
+            border-radius:5px;
+            padding:10px; 
+            grid-gap:1vh;
+        }
+        .ad{
+            display:grid;
+            grid-template-rows:1fr 1fr 1fr 1fr 1fr;
+            grid-gap:1vh;
+            border:2px groove black;
+            border-radius:5px;
+            padding:10px;
+        }
+        .entry{
+            display:flex;
+            flex-direction:row;
+            justify-content: space-around;
+            align-items:center;
+        }
+        .title{
+            display:grid;
+            grid-template-rows:1fr 1fr;
+            align-items:center;
+            border:2px groove black;
+            border-radius:5px;
+        }
+        /*.title{
+            margin-top:10px;
+            height:17vh;
+            display:grid;
+            color: rgba(255,255,255,1);
+            grid-template-rows:1fr 1fr;
+            align-items:center;
+            background-image:url("fineLog.png");
+            background-size:100% 93%;
+            position:relative;
+            background-color:transparent;
+            border:4px double black;
+        }
+        .title h1,h3,select{
+            position:relative;
+            z-index:100;
+        }
+        .title::before{
+            position: absolute;
+            content: "";
+            top:0px;
+            left:0px;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }*/
+        h3,h1{
+            text-align:center;
+            margin:0;
+        }
+        #sel_client_div,#log,#adLog{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+        }
+        #sel_consignor,#btn,#adBtn{
+            width:60%;
+            height:100%;
+        }
+        #sel_dept{
+            height:35px;
+            width:200px;
+            text-align:center;
+            font-weight:bold;
+        }
+        #id,#pw,#input_adpassword,#adPw{
+            height:80%;
+            width:70%;
+            text-align:center;
+        }
+        .adBtn{
+            display:none;
+        }
+        .active{
+            display:block;
+        }
+        #logo{
+            background:url("fineLog.png");
+            background-size:100% 100%;
+        }
+        
+        
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+    <script >        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
+            authDomain: "finecargoinformation.firebaseapp.com",
+            databaseURL: "https://finecargoinformation-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "finecargoinformation",
+            storageBucket: "finecargoinformation.appspot.com",
+            messagingSenderId: "562937971880",
+            appId: "1:562937971880:web:98fb4152608485d72eae9d",
+            measurementId: "G-27CHK5X1W5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database_f = firebase.database();
+        const auth = firebase.auth();
+        const ui = new firebaseui.auth.AuthUI(firebase.auth());
+    </script> 
+</head>
+<body id="main">
+    <div class="title">
+        <h1>FINETRADING WMS</h1>
+        <div class="entry">
+            <h3>화인통상 담당 물류센터명</h3>
+            <select title ="모든 거래처" id ="sel_dept" onchange="selDept();">
+                <option value="fine2">Fine2</option>
+                <option value="fine1">Fine1</option>
+                <option value="fine">Fine</option>
+                <option value="fineP">Fine평택</option>
+            </select>
+            <script>
+                function selDept(){
+                    const inV = document.getElementById("sel_dept").value;
+                    document.getElementById("dept_entry").innerHTML=inV +"  담당자 로그인";
+                }
+            </script>            
+        </div>
+    </div>
+    
+    <div id="client">
+        <h3> 거래처 로그인</h3>
+        <div id="sel_client_div">
+            <div >
+                <input type="text" value="업체명" id="id" onFocus="this.value='';return true;"onchange="selClient();">
+            </div >
+            <div>
+                <select title="화주명" id="sel_consignor">
+                </select>
+               
+            </div>
+
+        </div>
+        
+        <div id="log">
+            <input type="password" value="비밀번호" id="pw"onFocus="this.value='';return true;">
+            <div >
+                <button id="btn" value="Confirm" onclick="btn_reg()">거래처 Log In</button>
+            </div>
+        </div>
+        
+    </div>
+    <div class ="ad">
+        <div class="entry">
+            <h3 id="dept_entry"></h3>
+            <script>
+                const deptV = document.getElementById("sel_dept").value;
+                document.getElementById("dept_entry").innerHTML=deptV+"  담당자 로그인";
+            </script>    
+        </div>
+        <div id="adLog">
+            <input type="password" value="비밀번호" id="adPw"onFocus="this.value='';return true;">
+            <div >
+                <button id="adBtn" value="Confirm" onclick="btn_logA()">관리자 Log In</button>
+            </div>
+        </div>
+        <input class="adBtn" type="button" value="재고목록 신규등록,수정" onclick="btn_administrator_stock()">
+        <input class="adBtn" type="button" value="출고자료 현황 조회" onclick="btn_administrator_outcargoD()">
+        <input class="adBtn" type="button" value="출고자료 등록,수정" onclick="btn_administrator_outcargoU()">
+    </div>
+    <div id="logo">
+
+    </div>
+    
+    <script>
+        const actionCodeSettings = {
+            // URL you want to redirect back to. The domain (www.example.com) for this
+            // URL must be in the authorized domains list in the Firebase Console.
+            url: 'https://finecargoinformation.firebaseapp.com/__/auth/action?mode=action&oobCode=code',
+            // This must be true.
+            handleCodeInApp: true,
+            iOS: {
+              bundleId: 'com.example.ios'
+            },
+            android: {
+              packageName: 'com.example.android',
+              installApp: true,
+              minimumVersion: '12'
+            },
+            dynamicLinkDomain: 'https://finecargoinformation.firebaseapp.com/__/auth/action?mode=action&oobCode=code'
+          };
+        function btn_reg(){
+            var stock_link = 'wms_stock.html';
+            const clientValue = document.getElementById("id").value;
+            const deptValue = document.getElementById("sel_dept").value;
+            const consignValue = document.getElementById("sel_consignor").value;
+            const dataInfo ={"client" : clientValue,"dept":deptValue,"consignor":consignValue};
+            localStorage.setItem("BasicData",JSON.stringify(dataInfo));
+            window.location.href="wms_stock.html";
+        }
+        function btn_administrator_outcargoU(){
+            window.location.href="wms_reg.html";
+        }function btn_administrator_stock(){
+            window.location.href="wms_upload.html";
+        }
+        function btn_administrator_outcargoD(){
+            const deptValue = document.getElementById("sel_dept").value;
+            const dataInfo ={"dept":deptValue};
+            localStorage.setItem("BasicData",JSON.stringify(dataInfo));
+            window.location.href="wms_outcargoReport.html";
+        }
+        function selClient(){
+            const clientValue = document.getElementById("id").value;
+            const deptValue = document.getElementById("sel_dept").value;
+            const refPath = database_f.ref("DeptName/"+deptValue+"/ConsignorValue/"+clientValue);
+            refPath.get().then((snapshot)=>{
+                const snapV = snapshot.val();
+                const snapKeys = Object.keys(snapV);
+                const sel = document.getElementById("sel_consignor");
+                for(let sC in snapKeys){
+                    const op = document.createElement("option");
+                    op.value= snapKeys[sC];
+                    op.text = snapKeys[sC];
+                    sel.appendChild(op);
+                }
+
+            });
+        }
+        function btn_logA(){
+            const sData = document.getElementsByClassName("adBtn")[0];
+            const oData= document.getElementsByClassName("adBtn")[1];
+            const oDataR = document.getElementsByClassName("adBtn")[2];
+            sData.classList.toggle("active");
+            oData.classList.toggle("active");
+            oDataR.classList.toggle("active");
+        }
+       
+    </script>
+    
+</body>
+</html>

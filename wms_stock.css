@@ -1,0 +1,355 @@
+@charset "utf-8";
+    body{        
+        margin:0px;
+    }
+    tr{
+        height:5vh;
+    }
+      
+    th{
+        height:3vh;
+        width:3vw;        
+        border:1px solid #000;
+        text-align:center;
+        font-size: calc(0.2vw + 0.2vh + 0.2vmin);
+        background:gray;
+        border:1px solid #000;
+        position: sticky;
+        top: 0;
+    }
+    td{
+        height:2vh;
+        width:3vw;        
+        border:1px solid #000;
+        text-align:center;
+        font-size: calc(0.1vw + 0.1vh + 0.1vmin);
+        
+    }
+    table tbody tr:hover{
+        background-color: lightgray;
+        cursor:pointer;
+    }
+    #table{
+        border-collapse:collapse;
+        border-spacing: 0;
+        width:99%;        
+        display:grid;
+        grid-template-rows: 1fr 1fr;
+    }
+    #outcargotitle{
+        display:grid;
+        grid-template-columns: 0.7fr 1fr 0.8fr 0.6fr 0.8fr 2.5fr 0.8fr;
+        grid-column-gap: 1%;
+        text-align:center;
+    }
+    #dept_date{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+    }
+   
+    h3{
+        border:1px solid black;
+        height:4vh;
+        margin:0.3px;
+        text-align:center;
+        vertical-align:middle;
+        font-size: calc(0.1vw + 0.1vh + 0.1vmin);
+    }
+    h4{
+        display:flex;
+        align-items: center;
+        justify-items: center;
+        margin:0px;
+        height:90%;
+        font-size: calc(0.1vw + 0.1vh + 0.1vmin);
+    }
+    .result_title_input{       
+        border:1px solid black;
+        height:80%;
+        margin:0px;
+        padding:0px;
+        width:100%;
+        text-align:center;
+        vertical-align:middle;
+        font-size: calc(0.1vw + 0.1vh + 0.1vmin);
+        } 
+    .selected {
+        background-color: yellow;
+        color: black;
+        font-weight: bold;
+    }
+    .confirm-box {
+        display :grid;
+        grid-template-rows :1fr 1fr;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 20px;
+        text-align: center;
+      }
+      
+      .confirm-box button {
+        margin: 10px;
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        background-color: #ccc;
+        color: #fff;
+        cursor: pointer;
+      }
+      .table_container{
+        width:100%;
+        overflow-y:scroll;
+        padding:2px;
+      }
+     
+    .tableData{
+        width:100%;
+        height:50%;
+    }
+    #results{
+        width:100%;
+    }
+     /* #outcargo_results tr{
+        display:grid;
+        grid-template-columns:1fr 1fr 1fr 1fr;
+        height:4vh;
+      }*/
+      .outcargoResultBtr td{
+        height: 100%;        
+        border: 1px solid #000;
+        text-align: center;
+        vertical-align:middle;
+        font-size: calc(0.1vw + 0.1vh + 0.1vmin);        
+      }
+      #outcargo_results tr.active td{
+        display:block;
+        padding:1px;
+      }  
+      #outcargo_results{
+        width:99%;       
+        table-layout: fixed;
+        word-break: break-all;
+      }
+      
+      .result_title{
+        display:grid;
+        grid-template-columns:0.8fr 1.2fr;             
+        height:100%;
+        text-align:center;
+        vertical-align:middle;
+        font-size: calc(0.1vw + 0.1vh + 0.1vmin);        
+      }
+      .result_titleA #out_attachment{
+        display:none;
+      }
+      /* .upLoadLabel{
+        width:100%;
+        height:100%;
+      } */
+      .btn_upload{
+        background: #fff;
+        border: 1px solid rgb(77,77,77);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height:80%;
+        width:90%;
+        font-size:x-small
+        
+      }
+      .btn_upload:hover {
+        background: rgb(77,77,77);
+        color: #fff;
+    }
+    .result_titleA{
+        display:grid;
+        grid-template-columns:1fr 1fr 0.8fr;
+        background: rgb(226, 232, 241);
+    }
+    #out_attachment_del {
+        margin:5%;
+        font-size:small;
+    }
+    #file_names{
+        font-size:xx-small;
+    }
+    .inputTdQty,.inputTdPty,.inputTdRemark{
+        font-family:"Helvetica Neue";
+        color:darkred;
+        text-align:center;
+        height:4vh;
+        width:10vh;
+        font-weight:bold;       
+    }
+      .confirm {
+        background-color:beige;
+        color: black;
+        font-weight: bold;
+    }
+    #info ,#result {
+        display:grid;
+        grid-template-rows:15fr 85fr;
+        height: calc(50vh*0.9);
+        margin:1%;
+    }
+    #resultTitle{
+        height:4vh;
+        margin:0px;
+        font-size: calc(0.1vw + 0.1vh + 0.1vmin);
+    }
+    #info1{
+        padding:0.5%;
+    }
+    #infoTitle{
+        border:1px groove blanchedalmond;
+        display:grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 5fr 1fr;
+        padding:1px;
+    }
+    .infoResult{
+        display:grid;
+        grid-template-columns: 1.3fr 2fr 2fr;
+    }
+    .infoResult h5{
+        display:flex;
+        justify-content: center;
+        align-items :center;
+        margin:0px;
+        word-break:break-word;
+    }
+    .infoResult h6{
+        display:flex;
+        justify-content: center;
+        align-items :center;
+        font-size:x-small;
+    }
+    #out_date{
+        width:80%;
+        height:80%;
+        margin:0px;
+        font-size:xx-small;
+    }
+    #out_submit{
+        width:100%;
+        height:80%;
+        margin:0px;
+        font-size:x-small;
+    }
+    .tableMain{
+        display:grid;
+        grid-template-columns: 2fr 1fr;
+    } 
+   
+    .outcargoResult{
+        overflow-y:scroll;
+        margin:2%;
+        width:97.5%;
+    }.outcargoResultTitle{
+        display:grid;
+        grid-template-rows:1fr 0.7fr;       
+        margin:2%;
+        margin-bottom:0%;
+    }
+    .subDiv{
+        height:0;
+        overflow:hidden;
+        display:none;
+        transition: all 1s;
+        margin-bottom:- 10px;
+        table-layout:fixed;
+        
+    }
+    .active{
+        display:block;
+        margin:1.5vh;
+        
+        /* width:31.7vw; */
+        height:auto;
+    }
+    .active thead{
+        table-layout: fixed;
+        word-break: break-all;
+    }
+   
+    .active th{
+        width:5.4vw;
+        background: rgba(170, 224, 242, 0.854);
+        border:0.5px dotted black;
+    }
+    .active td{
+        width:5.4vw;
+        border:0.5px dotted black;
+    }
+    .stockMain{
+        display:grid;
+        grid-template-rows:1.5fr 8.5fr;
+        
+    }
+    .outcargoDate{
+        display:grid;
+        grid-template-columns:1fr 1fr 1fr 1fr 1fr;
+        margin-right:1%;
+    }
+   
+    .outcargoDateS h1,h6{
+        display:flex;
+        justify-content: center;
+        align-items :center;
+        font-size:90%;
+    }
+    .outcargoDateS{
+        display:flex;
+        justify-content: center;
+        align-items :center;
+        width:100%;
+        font-weight:bold;
+    }
+    
+    label{
+        display:flex;
+        justify-content: center;
+        align-items :center;
+        margin:0px;
+    }
+    .hidden{
+        display:none;
+    }
+    button ,#out_date{
+        background: rgb(208, 216, 222);
+        font-size: xx-small;
+        height:80%;
+        background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
+    }
+    #date_picker1,#date_picker2,#date_count,#data_del,#data_trans{
+        background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
+        font-size: xx-small;
+        height:60%;
+        width:90%;
+    }
+    #btn_excelwrite{
+        font-size:xx-small;
+        margin-top:5%;
+        margin-right:10%;
+        height:70%;
+        cursor:pointer;
+        
+    }
+    .data_delD{
+        display:flex;
+        align-items:center;
+        justify-content: center;
+    }
+    .resultDiv{
+        display:flex;
+        justify-content:center;
+        align-items: center;
+    }
+   
+    
+    
+    

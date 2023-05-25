@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data_Regist</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <link href="./datepicker/css/datepicker.min.css" rel="stylesheet" type="text/css" media="all">
+    <!-- Air datepicker css -->
+    <script src="./datepicker/js/datepicker.js"></script> <!-- Air datepicker js -->
+    <script src="./datepicker/js/datepicker.ko.js"></script> <!-- 달력 한글 추가를 위해 커스텀 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+    <script >
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
+            authDomain: "finecargoinformation.firebaseapp.com",
+            databaseURL: "https://finecargoinformation-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "finecargoinformation",
+            storageBucket: "finecargoinformation.appspot.com",
+            messagingSenderId: "562937971880",
+            appId: "1:562937971880:web:98fb4152608485d72eae9d",
+            measurementId: "G-27CHK5X1W5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var database_f = firebase.database();
+    </script>
+    <style>
+        .mainDiv{
+            display:grid;
+            grid-template-rows:1fr 0.5fr 8.5fr;
+        }
+        .tableDiv{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+        }
+        h3{
+            text-align: center;
+            vertical-align: middle;
+        }
+        table{
+            width:100%;
+            table-layout:fixed;
+            word-break:break-all;
+            border:1px solid #000;
+            text-align:center;
+        }
+        table tbody tr:hover{
+            background-color: lightgray;
+            cursor:pointer;
+        }
+        .hidden{
+            display:none;
+        }
+        .subTable{
+            height:0;
+            overflow:hidden;
+            display:none;
+            transition: all 1s;
+            margin-bottom:- 10px;
+        }
+        .active{
+            display:block;
+            width:50vw;
+            height:auto;
+        }
+        .select{
+            background-color:beige;
+            color: black;
+            font-weight: bold;
+        }
+        
+        .afterDivSubBtn ,.beforeDivInfo{
+            display:grid;
+            grid-template-columns:4fr 1fr;
+            margin-right:5vw;
+        }
+        .afterDivSubBtn h3,.beforeDivInfo h3,#reg_consignor,h1{
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            height:100%;
+        }
+        #btn_subreg ,#btn_selectreg{
+            margin:1vh;
+        }
+        
+        .beforeTableContainer,.afterTableContainer{
+            overflow-y:scroll;
+            margin:0px;
+        } 
+        tr,td{
+            height:5vh;
+            border:0.5px solid black;
+        }
+        th{
+            height:5vh;
+            border:2px groove black;
+        }
+        .beforeDiv,.afterDiv{
+            display:grid;
+            grid-template-rows:1fr 9fr;
+        }
+        .outcargoDate{
+            display:grid;
+            grid-template-columns:1fr 1fr 0.3fr 1fr 1fr;
+            height:100%;
+        }
+        .outcargoDateS input{
+            height:80%;
+            width:60%;
+        }      
+        .titleDiv{
+            margin-top:1%;
+            margin-left:15%;
+            margin-right:15%;
+        }
+        #date_picker1{
+            margin-left:30%;
+        }
+        #date_picker2{
+            margin-left:10%;
+        }
+        h6{
+            text-align:center;
+            
+        }
+    </style>
+</head>
+<body>
+    <div class="mainDiv">
+        <div class="titleDiv">
+            <div class="outcargoDate">
+                <div><h3 id="reg_consignor"> Fine 2 출고 현황</h3>
+                    <!-- <script>
+                        var info =JSON.parse(localStorage.getItem("info"))["info"];
+                        document.getElementById("reg_consignor").innerHTML = info;
+                    </script> -->
+                </div>
+                <div class="outcargoDateS">
+                    <input type="button" value="시작일" id="date_picker1" />
+                </div>
+                <div class="outcargoDateS">
+                    <h1>~</h1>
+                </div>
+                <div class="outcargoDateS">
+                    <input type="button" value="종료일" id="date_picker2" >
+                </div>
+                <div class="outcargoDateS">
+                    <input type="button" id="date_count" value="출고현황 검색" onclick="get_datecount()"/>
+                </div>
+                <script>
+                    function transDate(dateT){
+                        let result_month = dateT.getMonth()+1;
+                        let result_day =dateT.getDate();
+                        if(result_month<10){
+                            result_month ="0"+result_month;
+                        };
+                        if(result_day <10){
+                            result_day = "0"+result_day;
+                        };
+                        var result_date = dateT.getFullYear()+"-"+result_month+"-"+result_day;
+                        return result_date;
+                    }
+                    document.getElementById("date_picker1").value=transDate(new Date());
+                    document.getElementById("date_picker2").value=transDate(new Date());
+                    $("#date_picker1").datepicker({
+                        language: 'ko'
+                    });
+                    $("#date_picker2").datepicker({
+                        language: 'ko'
+                    });
+                </script>
+            </div>
+        </div>
+        <h6> 출고등록 진행시 정상품 출고 진행외 파손품포함 출고 진행되면 DataBase 수기로 등록해야 합니다.<br> 출고등록후 출고등록 자료 항목 클릭하여 필히 출고후 재고 확인 바랍니다.</h6>
+        <div class="tableDiv">    
+        <div class="beforeDiv">
+            <div class="beforeDivInfo">
+                    <h3 id="reg_title">출고 요청자료(등록전)</h3>
+                    <button id="btn_selectreg" onclick="selectReg();">선택자료 출고등록</button>
+            </div>
+            
+            <div class="beforeTableContainer">
+                <table class="beforeTable">
+                    <thead>
+                        <tr>
+                            <th>화주명</th>
+                            <th>출고일</th>
+                            <th>출고처</th>
+                            <th>출고요청수량<br>(EA)</th>
+                            <th>출고요청수량<br>(PLT)</th>
+                            <th>출고요청사항</th>
+                        </tr>
+                    </thead>
+                   
+                </table>
+                
+            </div>
+            
+        </div>
+        <div class="afterDiv">
+            <div class="afterDivSubBtn">
+                <h3>출고등록 자료(서버등록 자료)</h3>
+                <button id="btn_subreg" onclick="subReg();">선택자료<br> 출고증 출력</button>
+            </div>
+            <div class="afterTableContainer">
+                <table class="afterTable">
+                    <thead>
+                        <tr>
+                            <th>화주명</th>
+                            <th>출고일</th>
+                            <th>출고처</th>
+                            <th>출고요청수량<br>(EA)</th>
+                            <th>출고요청수량<br>(PLT)</th>
+                            <th>출고요청사항</th>
+                        </tr>
+                    </thead>
+                    
+                </table>
+            </div>
+            
+        </div>
+        </div>
+    </div>
+    <script>
+        var deptV = "fine2"
+        var dateO = transDate(new Date());
+        
+        var snapValue = null;
+        var clientValue = null;
+        var thListH =["출고일","출고처","BL","품명","출고요청수량(EA)","출고요청수량(PLT)","출고후 총재고(EA)","출고후 총재고(PLT)","출고후 출고가능수량(EA)","출고후 출고가능수량(PLT)","화주명","반입일",   "출고요청사항"]
+        var thList =["화주명","출고일","출고처","출고요청수량(EA)","출고요청수량(PLT)","출고요청사항"]
+        
+        function getOutcargoReport(date){
+            var refPath="DeptName/"+deptV+"/OutCargoReport/"+date;
+            const refValue = database_f.ref(refPath);
+            refValue.get().then((snapshot)=>{
+                snapValue = snapshot.val();
+                if(snapValue==null){
+                    alert(date+" 출고자료 없는것으로 확인 됩니다.");
+                    return;
+                }
+                clientValue = Object.keys(snapValue);
+                let bTable = document.getElementsByClassName("beforeTable")[0];
+                let bTbody = document.createElement("tbody");
+                bTbody.setAttribute("class","bTbody");
+                bTable.appendChild(bTbody);
+
+                let aTable = document.getElementsByClassName("afterTable")[0];
+                let aTbody = document.createElement("tbody");
+                aTbody.setAttribute("class","aTbody");
+                aTable.appendChild(aTbody);
+                for(let keyC=0;keyC<clientValue.length;keyC++){
+                    var outcargoReportC = snapValue[clientValue[keyC]]["Content"];
+                    var outcargoReportI = snapValue[clientValue[keyC]]["Info"];
+                    if(date=outcargoReportI["출고일"]){
+                    let infoC =Object.keys(outcargoReportI);
+                    let outcargoRec =Object.keys(outcargoReportC);
+                    let outcargoL = outcargoRec.length;
+                    let bTr = document.createElement("tr");
+                    bTr.addEventListener("click",(event)=>{
+                        let rowTarget = event.target.parentNode;
+                        rowTarget.classList.toggle("select");
+                        let rowsIndex = rowTarget.rowIndex-1;
+                        let targetTable = bTbody.getElementsByClassName("subTable")[rowsIndex];
+                        targetTable.classList.toggle("active");
+                    })
+                    let aTr = document.createElement("tr");
+                    aTr.addEventListener("click",(event)=>{
+                        let rowTarget = event.target.parentNode;
+                        rowTarget.classList.toggle("select");
+                        let rowsIndex = rowTarget.rowIndex-1;
+                        let targetTable = aTbody.getElementsByClassName("subTable")[rowsIndex];
+                        targetTable.classList.toggle("active");
+                    })
+                    for(var m=0;m<thList.length;m++){
+                        if(outcargoReportI["Process"]=="Holding"||outcargoReportI["Process"]==null){
+                            let bTd = document.createElement("td");
+                            bTd.innerHTML = outcargoReportI[thList[m]];
+                            bTr.appendChild(bTd);
+                            bTbody.appendChild(bTr);
+                        }else{
+                            let aTd = document.createElement("td");
+                            aTd.innerHTML = outcargoReportI[thList[m]];
+                            aTr.appendChild(aTd);
+                            aTbody.appendChild(aTr);
+                        }
+                    }
+                    if(outcargoReportI["Process"]=="Holding"||outcargoReportI["Process"]==null){
+                        let bTd = document.createElement("td");
+                        bTd.value = outcargoReportI["refI"];
+                        bTd.setAttribute("class","hidden");
+                        bTr.appendChild(bTd);
+                        bTbody.appendChild(bTr);
+                    }else{
+                        let aTd = document.createElement("td");
+                        aTd.value = outcargoReportI["refI"];
+                        aTd.setAttribute("class","hidden");
+                        aTr.appendChild(aTd);
+                        aTbody.appendChild(aTr);
+                    }
+                    
+                    let tableSub = document.createElement("table");
+                    tableSub.setAttribute("class","subTable");
+                    let theadSub = document.createElement("thead");
+                    tableSub.appendChild(theadSub);
+                    let tbodySub = document.createElement("tbody");
+                    tableSub.appendChild(tbodySub);
+                    let thrSub = document.createElement("tr");
+                    theadSub.appendChild(thrSub);
+                    
+                    for(let thdC in thListH){
+                        let thdSub = document.createElement("th");
+                        thdSub.innerHTML = thListH[thdC];
+                        thrSub.appendChild(thdSub);
+                    }
+                    if(outcargoReportI["Process"]=="Holding"||outcargoReportI["Process"]==null){
+                        bTbody.appendChild(tableSub);
+                    }else{
+                        aTbody.appendChild(tableSub);
+                    }
+                    
+                    if(outcargoReportC ==null){
+                        console.log("null point exception");
+                        continue;
+                    }
+                    for(let i in outcargoRec){
+                        let sortTr =outcargoReportC[outcargoRec[i]];
+                        let sortTrKey = Object.keys(sortTr);
+                        let subTrB = null;
+                        let subTrA = null;
+                        let subTdB = null;
+                        let subTdA = null;
+
+                        if(sortTr["Process"] =="Holding"||sortTr["Process"]==null){
+                            subTrB = document.createElement("tr");
+                            subTrB.setAttribute("class", "subTrB");
+                        }else{
+                            subTrA = document.createElement("tr");
+                            subTrA.setAttribute("class", "subTrA");
+                        }
+                        
+                        for(let j in thListH){
+                            if(sortTr["Process"] =="Holding"||sortTr["Process"]==null){
+                                subTdB = document.createElement("td");
+                                subTdB.innerHTML = sortTr[thListH[j]];
+                                subTrB.appendChild(subTdB);
+                            }else{
+                                subTdA = document.createElement("td");
+                                subTdA.innerHTML = sortTr[thListH[j]];
+                                subTrA.appendChild(subTdA);
+                            }
+                        }
+                        if(sortTr["refPath"] != null){
+                            if(sortTr["Process"] =="Holding"||sortTr["Process"]==null){
+                                let bTdH = document.createElement("td");
+                                bTdH.value = sortTr["refPath"];
+                                bTdH.setAttribute("class","hidden");
+                                subTrB.appendChild(bTdH);
+                                let bTdLot = document.createElement("td");
+                                bTdLot.value = sortTr["Lot"];
+                                bTdLot.setAttribute("class","hidden");
+                                subTrB.appendChild(bTdLot);
+                                let bTdRefS = document.createElement("td");
+                                bTdRefS.value = sortTr["refS"];
+                                bTdRefS.setAttribute("class","hidden");
+                                subTrB.appendChild(bTdRefS);
+                            }else{
+                                let aTdH = document.createElement("td");
+                                aTdH.value = sortTr["refPath"];
+                                aTdH.setAttribute("class","hidden");
+                                subTrA.appendChild(aTdH);
+                                let aTdLot = document.createElement("td");
+                                aTdLot.value = sortTr["Lot"];
+                                aTdLot.setAttribute("class","hidden");
+                                subTrA.appendChild(aTdLot);
+                                let aTdRefS = document.createElement("td");
+                                aTdRefS.value = sortTr["refS"];
+                                aTdRefS.setAttribute("class","hidden");
+                                subTrA.appendChild(aTdRefS);
+                            }
+                        }
+                        if(subTrB !==null){
+                            tbodySub.appendChild(subTrB);
+                        }
+                        if(subTrA !==null){
+                            tbodySub.appendChild(subTrA);
+                        }}
+                    }
+                }
+                });
+        }
+        
+        function selectReg(){
+            let ele = document.querySelectorAll(".select");
+            console.log(ele);
+            for(var selC=0; selC<ele.length;selC++){
+                let selTable = document.getElementsByClassName("subTable active")[selC];
+                let selRow = selTable.rows.length;
+                for(var rowC=1;rowC<selRow;rowC++){
+                    const selRow =selTable.rows[rowC];
+                    let selRef = selRow.cells[13].value;
+                    let stockRef = selRow.cells[15].value;
+                    let dbRef = database_f.ref(selRef);
+                    let dbRefP =dbRef.parent.parent;
+                    let dbStockRef = database_f.ref(stockRef);
+                    const oQty = parseInt(selRow.cells[4].innerHTML);
+                    const oPty = parseInt(selRow.cells[5].innerHTML);
+                    dbStockRef.get().then((snapshot)=>{
+                        const stockV = snapshot.val();
+                        const aQty = parseInt(stockV["출고가능수량(EA)"]);
+                        const aPty = parseInt(stockV["출고가능수량(PLT)"]);
+                        const tQty = parseInt(stockV["총재고수량(EA)"]);
+                        const tPty = parseInt(stockV["총재고수량(PLT)"]);
+                        let dQty = parseInt(stockV["파손수량(EA)"]);
+                        let dPty = parseInt(stockV["파손수량(PLT)"]);
+                        if(isNaN(dQty)){
+                            dQty = 0;
+                        }
+                        if(isNaN(dPty)){
+                            dPty = 0;
+                        }
+                        let stockOb ={};
+                        if(oQty<=aQty){
+                            stockOb ={"출고가능수량(EA)":aQty-oQty,"출고가능수량(PLT)":aPty-oPty,"총재고수량(EA)":tQty-oQty,"총재고수량(PLT)":tPty-oPty,"파손수량(EA)":dQty,"파손수량(PLT)":dPty};
+                        }
+                        
+                        dbStockRef.update(stockOb);
+
+                    });
+                    dbRefP.child("Info/").update({"Process":"Completion"}).then(() => {
+                        console.log("Object uploaded successfully!");
+                    })
+                    .catch((error) => {
+                        console.error("Error uploading object: ", error);
+                    });;
+                    dbRef.update({"Process":"Completion"}).then(() => {
+                        console.log("Object uploaded successfully!");
+                    })
+                    .catch((error) => {
+                        console.error("Error uploading object: ", error);
+                    });
+
+                }             
+            }
+            get_datecount();
+        }
+        get_datecount();
+        function subReg(){
+            let infoOb={};
+            let contentOb={};
+            let selectRow=document.querySelectorAll(".select");
+            if(selectRow.length>1||selectRow.length<1){
+                alert("출고등록 1건 선택 바랍니다.!");
+                return;
+            }
+            let selectTableList = document.getElementsByClassName("subTable active")[0];
+            let selectTrList=selectTableList.querySelectorAll("tr");
+            for(var trC =1;trC<selectTrList.length;trC++){
+                let contentObTd={};
+                for(let tdC in thListH){
+                    contentObTd[thListH[tdC]] = selectTrList[trC].cells[tdC].innerHTML;
+                }
+                contentObTd["Lot"] =selectTrList[trC].cells[14].value;
+                contentOb["tr"+trC]= contentObTd;
+            };
+            for(let infoC in thList){
+                infoOb[thList[infoC]]=selectRow[0].cells[infoC].innerHTML;
+            }
+            infoOb["refI"] =selectRow[0].cells[6].value;
+            sessionStorage.setItem("infoOb",JSON.stringify(infoOb));
+            sessionStorage.setItem("contentOb",JSON.stringify(contentOb));
+            window.open("wms_do.html");
+        }
+        
+        
+        function get_datecount(){
+            const tBodyEle= document.getElementById("outcargo_tbody");
+            if(tBodyEle != null){
+                tBodyEle.remove();
+            }
+            sDate = new Date(document.getElementById("date_picker1").value);
+            eDate = new Date(document.getElementById("date_picker2").value);
+            var curDate = sDate;
+            const countDateList = []
+            while(curDate<=eDate){
+                countDateList.push(transDate(curDate));
+                curDate.setDate(curDate.getDate() +1)
+            }
+            const delParent = document.getElementsByClassName("beforeTable")[0];
+            const delChild = document.getElementsByClassName("bTbody");
+            for(var delB=0 ; delChild.length;delB++){
+                delChild[delB].remove();
+            }
+
+            for(let dateC in countDateList){
+                getOutcargoReport(countDateList[dateC]);
+            }
+
+        }
+        
+    </script>
+    
+    
+    
+</body>
+</html>
