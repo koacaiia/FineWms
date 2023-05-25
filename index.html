@@ -20,7 +20,8 @@
             grid-template-rows: 1fr 1fr 1fr;
             border:2px groove black;
             border-radius:5px;
-            padding:10px; 
+            padding:10px;
+            padding-left:30px; 
             grid-gap:1vh;
         }
         .ad{
@@ -30,6 +31,7 @@
             border:2px groove black;
             border-radius:5px;
             padding:10px;
+            padding-left:30px;
         }
         .entry{
             display:flex;
@@ -76,28 +78,37 @@
         }
         #sel_client_div,#log,#adLog{
             display:grid;
-            grid-template-columns:1fr 1fr;
+            grid-template-columns:1fr 1fr 1fr;
         }
         #sel_consignor,#btn,#adBtn{
             width:60%;
-            height:100%;
+            height:90%;
+            background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
+            border-radius:5px;
         }
         #sel_dept{
             height:35px;
             width:200px;
             text-align:center;
             font-weight:bold;
+            background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
+            border-radius:5px;
         }
-        #id,#pw,#input_adpassword,#adPw{
+        #id,#pw,#input_adpassword,#adPw,#adId{
             height:80%;
             width:70%;
             text-align:center;
+            border-radius:5px;
         }
         .adBtn{
             display:none;
         }
         .active{
             display:block;
+            background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
+            width:60%;
+            margin:0 auto;
+            border-radius:5px;
         }
         #logo{
             background:url("fineLog.png");
@@ -181,14 +192,16 @@
             </script>    
         </div>
         <div id="adLog">
+            <input type="text" value="담당자" id="adId"onFocus="this.value='';return true;">
             <input type="password" value="비밀번호" id="adPw"onFocus="this.value='';return true;">
-            <div >
-                <button id="adBtn" value="Confirm" onclick="btn_logA()">관리자 Log In</button>
-            </div>
+            <button id="adBtn" value="Confirm" onclick="btn_logA()">관리자 Log In</button>
         </div>
-        <input class="adBtn" type="button" value="재고목록 신규등록,수정" onclick="btn_administrator_stock()">
-        <input class="adBtn" type="button" value="출고자료 현황 조회" onclick="btn_administrator_outcargoD()">
-        <input class="adBtn" type="button" value="출고자료 등록,수정" onclick="btn_administrator_outcargoU()">
+        
+            <input class="adBtn" type="button" value="재고목록 신규등록,수정" onclick="btn_administrator_stock()">
+            <input class="adBtn" type="button" value="출고자료 현황 조회" onclick="btn_administrator_outcargoD()">
+            <input class="adBtn" type="button" value="출고자료 등록,수정" onclick="btn_administrator_outcargoU()">  
+        
+       
     </div>
     <div id="logo">
 
