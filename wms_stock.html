@@ -46,7 +46,9 @@
                 <div id="infoTitle">
                     <h6  id="depot_s"></h6>
                     <h6  id="title"></h6>
-                    <select title="화주명"  id="consignor"></select>
+                    <div id="consignorDiv">
+                        <select title="화주명"  id="consignor"></select>
+                    </div>
                     <h6  id="date"></h6>
                     <script>
                         var today = new Date();
@@ -67,19 +69,50 @@
                         document.getElementById("depot_s").innerHTML=deptName;
                         document.getElementById("date").innerHTML=date;
                         const consigSel = document.getElementById("consignor");
-                        for(let cC in consignorData){
-                            const op = document.createElement("option");
-                            op.value =consignorData[cC];
-                            op.text = consignorData[cC];
-                            consigSel.appendChild(op);
-                        }
-                        let consignorName = consigSel[1].value;
-                        consigSel.addEventListener("selected",(event)=>{
-                            console.log(event)
+                        database_f.ref("DeptName/"+deptName+"/ConsignorValue/"+clientName).get().then((snapshot)=>{
+                            console.log(snapshot.val());
+                            const obConsignor = Object.keys(snapshot.val());
+                            if(obConsignor.length==1){
+                                const op = document.createElement("option");
+                                op.value=obConsignor[0];
+                                op.text = obConsignor[0];
+                                consigSel.appendChild(op);
+                                getOutcargoData(obConsignor[0]);
+                                document.getElementById("out_consignee").value=obConsignor[0];                                
+                            }else{
+                                const op = document.createElement("option");
+                                op.value = "화주선택"
+                                op.text ="화주선택";
+                                consigSel.appendChild(op);
+                                for(let cC in obConsignor){
+                                const op = document.createElement("option");
+                                op.value=obConsignor[cC];
+                                op.text = obConsignor[cC];
+                                consigSel.appendChild(op);
+                            }
+
+                            }
+                            
                         });
-                        consigSel.addEventListener("onfocus",(event)=>{
-                            console.log(event)
+                        // if(consignorData.length>1){
+                        //     const op = document.createElement("option");
+                        //     op.value="화주선택";
+                        //     op.text ="화주선택";
+                        //     consigSel.appendChild(op);
+                        // }
+                        // for(let cC in consignorData){
+                        //     const op = document.createElement("option");
+                        //     op.value =consignorData[cC];
+                        //     op.text = consignorData[cC];
+                        //     consigSel.appendChild(op);
+                        // }
+                        consigSel.addEventListener("change",(event)=>{
+                            console.log("listener Check")
+                            const consigName=event.target.value;
+                            getOutcargoData(consigName);
+                            document.getElementById("out_consignee").value=consigName;
                         });
+                       
                         //document.getElementById("consignor").innerHTML=consignorName;       
                     </script>
                     <div class="infoResult">
@@ -150,9 +183,7 @@
                     </div>
                     <div class="resultDiv">
                         <input type="input" id = "out_consignee" class = "result_title_input" />
-                    <script>
-                        document.getElementById("out_consignee").value = consignorName;
-                    </script>  
+                    
                     </div>    
                 </div>
                 <div class="result_title">
@@ -309,7 +340,7 @@
        
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
         <script >
-            alert(clientName+" 에서 관리하는 화주가 "+  consignorData + "  로 확인 됩니다."+"\n화주 확인후 업무 진행 바랍니다.!")
+            /*alert(clientName+" 에서 관리하는 화주가 "+  consignorData + "  로 확인 됩니다."+"\n화주 확인후 업무 진행 바랍니다.!")*/
             //sendMessage();
             let hiddenRefPath;
             let fileNames=[];
@@ -334,6 +365,10 @@
             deptName+"/ConsignorValue/"+clientName+"/"+consignorData+"/StockReport/");
             var ref_arr = new Array();
             refValue.get().then((snapshot)=>{
+                if(snapshot.val()==null){
+                    alert(consignorData+" DataBase 오류 확인 관리자 문의 바랍니다.!");
+                    return;
+                }
                 const value = Object.values(snapshot.val());
                 const key = Object.keys(snapshot.val());
                 const key_inner = Object.keys(value[0]);

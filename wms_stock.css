@@ -362,6 +362,14 @@
     #consignor{
         text-align:center;
     }
+    #consignorDiv{
+        padding-top:3%;
+        padding-left:10%;
+        padding-right:10%;
+    }
+    #date{
+        padding-left:20%;
+    }
    
     
     

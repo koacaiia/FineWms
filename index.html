@@ -46,33 +46,8 @@
             border:2px groove black;
             border-radius:5px;
         }
-        /*.title{
-            margin-top:10px;
-            height:17vh;
-            display:grid;
-            color: rgba(255,255,255,1);
-            grid-template-rows:1fr 1fr;
-            align-items:center;
-            background-image:url("fineLog.png");
-            background-size:100% 93%;
-            position:relative;
-            background-color:transparent;
-            border:4px double black;
-        }
-        .title h1,h3,select{
-            position:relative;
-            z-index:100;
-        }
-        .title::before{
-            position: absolute;
-            content: "";
-            top:0px;
-            left:0px;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }*/
-        h3,h1{
+       
+        h3,h1,h5{
             text-align:center;
             margin:0;
         }
@@ -164,25 +139,18 @@
     
     <div id="client">
         <h3> 거래처 로그인</h3>
+        <h5> 업체명 입력과 등록 비밀번호 입력후 거래처 Log In 버튼 클릭 바랍니다.</h5>
         <div id="sel_client_div">
             <div >
                 <input type="text" value="업체명" id="id" onFocus="this.value='';return true;"onchange="selClient();">
             </div >
-            <div>
-                <select title="화주명" id="sel_consignor">
-                    <option value="CMS">CMS</option>
-                </select>
-               
-            </div>
+            <input type="password" value="비밀번호" id="pw"onFocus="this.value='';return true;">
+            <button id="btn" value="Confirm" onclick="btn_reg()">거래처 Log In</button>
+           
 
         </div>
         
-        <div id="log">
-            <input type="password" value="비밀번호" id="pw"onFocus="this.value='';return true;">
-            <div >
-                <button id="btn" value="Confirm" onclick="btn_reg()">거래처 Log In</button>
-            </div>
-        </div>
+       
         
     </div>
     <div class ="ad">
