@@ -85,6 +85,7 @@
             height:90%;
             background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
             border-radius:5px;
+            text-align:center;
         }
         #sel_dept{
             height:35px;
@@ -169,6 +170,7 @@
             </div >
             <div>
                 <select title="화주명" id="sel_consignor">
+                    <option value="CMS">CMS</option>
                 </select>
                
             </div>
@@ -208,6 +210,7 @@
     </div>
     
     <script>
+        let consignValue=["CMS"];
         const actionCodeSettings = {
             // URL you want to redirect back to. The domain (www.example.com) for this
             // URL must be in the authorized domains list in the Firebase Console.
@@ -228,7 +231,6 @@
             var stock_link = 'wms_stock.html';
             const clientValue = document.getElementById("id").value;
             const deptValue = document.getElementById("sel_dept").value;
-            const consignValue = document.getElementById("sel_consignor").value;
             const dataInfo ={"client" : clientValue,"dept":deptValue,"consignor":consignValue};
             localStorage.setItem("BasicData",JSON.stringify(dataInfo));
             window.location.href="wms_stock.html";
@@ -253,6 +255,7 @@
                 const snapKeys = Object.keys(snapV);
                 const sel = document.getElementById("sel_consignor");
                 for(let sC in snapKeys){
+                    consignValue.push(snapKeys[sC]);
                     const op = document.createElement("option");
                     op.value= snapKeys[sC];
                     op.text = snapKeys[sC];

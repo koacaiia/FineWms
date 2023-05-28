@@ -41,6 +41,7 @@
         grid-template-columns: 0.7fr 1fr 0.8fr 0.6fr 0.8fr 2.5fr 0.8fr;
         grid-column-gap: 1%;
         text-align:center;
+        padding-right:5px;
     }
     #dept_date{
         display:grid;
@@ -72,6 +73,7 @@
         text-align:center;
         vertical-align:middle;
         font-size: calc(0.1vw + 0.1vh + 0.1vmin);
+        border-radius:3px;
         } 
     .selected {
         background-color: yellow;
@@ -196,6 +198,8 @@
         grid-template-rows:15fr 85fr;
         height: calc(50vh*0.9);
         margin:1%;
+        border:2px groove black;
+        border-radius:5px;
     }
     #resultTitle{
         height:4vh;
@@ -209,7 +213,8 @@
         border:1px groove blanchedalmond;
         display:grid;
         grid-template-columns: 1fr 1fr 1fr 1fr 5fr 1fr;
-        padding:1px;
+        padding:2px;
+        padding-top:10px;
     }
     .infoResult{
         display:grid;
@@ -288,7 +293,9 @@
     .stockMain{
         display:grid;
         grid-template-rows:1.5fr 8.5fr;
-        
+        border:2px ridge black;
+        border-radius:5px;
+        margin:10px;
     }
     .outcargoDate{
         display:grid;
@@ -301,6 +308,7 @@
         justify-content: center;
         align-items :center;
         font-size:90%;
+        font-weight:normal;
     }
     .outcargoDateS{
         display:flex;
@@ -324,12 +332,14 @@
         font-size: xx-small;
         height:80%;
         background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
+        border-radius:3px;
     }
     #date_picker1,#date_picker2,#date_count,#data_del,#data_trans{
         background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
-        font-size: xx-small;
+        font-size: 60%;
         height:60%;
         width:90%;
+        border-radius:3px;
     }
     #btn_excelwrite{
         font-size:xx-small;
@@ -348,6 +358,9 @@
         display:flex;
         justify-content:center;
         align-items: center;
+    }
+    #consignor{
+        text-align:center;
     }
    
     

@@ -46,7 +46,7 @@
                 <div id="infoTitle">
                     <h6  id="depot_s"></h6>
                     <h6  id="title"></h6>
-                    <h6  id="consignor"></h6>
+                    <select title="화주명"  id="consignor"></select>
                     <h6  id="date"></h6>
                     <script>
                         var today = new Date();
@@ -58,15 +58,29 @@
                         if(day <10){
                             day = "0"+day
                         }
-                        var date =today.getFullYear()+"-"+month+"-"+day;
-                        var title = document.getElementById('title');
-                        var clientName =  JSON.parse(localStorage.getItem("BasicData"))["client"];
+                        let date =today.getFullYear()+"-"+month+"-"+day;
+                        let title = document.getElementById('title');
+                        let clientName =  JSON.parse(localStorage.getItem("BasicData"))["client"];
                         title.innerText = clientName;
-                        var deptName = JSON.parse(localStorage.getItem("BasicData"))["dept"];
-                        var consignorName= JSON.parse(localStorage.getItem("BasicData"))["consignor"];
+                        let deptName = JSON.parse(localStorage.getItem("BasicData"))["dept"];
+                        let consignorData= JSON.parse(localStorage.getItem("BasicData"))["consignor"];
                         document.getElementById("depot_s").innerHTML=deptName;
                         document.getElementById("date").innerHTML=date;
-                        document.getElementById("consignor").innerHTML=consignorName;       
+                        const consigSel = document.getElementById("consignor");
+                        for(let cC in consignorData){
+                            const op = document.createElement("option");
+                            op.value =consignorData[cC];
+                            op.text = consignorData[cC];
+                            consigSel.appendChild(op);
+                        }
+                        let consignorName = consigSel[1].value;
+                        consigSel.addEventListener("selected",(event)=>{
+                            console.log(event)
+                        });
+                        consigSel.addEventListener("onfocus",(event)=>{
+                            console.log(event)
+                        });
+                        //document.getElementById("consignor").innerHTML=consignorName;       
                     </script>
                     <div class="infoResult">
                         <h6 id="stock_case">총재고 건수:</h6>
@@ -77,6 +91,29 @@
                 </div>
                 
             <div id="table_div" class="table_container">
+                <table id="table_data" class="tableData">
+                    <thead>
+                        <tr>
+                            <th>반입일</th>
+                            <th>BL</th>
+                            <th>품목</th>
+                            <th>세부품목</th>
+                            <th>반입수량(EA)</th>
+                            <th>반입요청수량(PLT)</th>
+                            <th>부족수량(SHORTAGE)_EA</th>
+                            <th>출고후 출고가능수량(EA)</th>
+                            <th>출고후 출고가능수량(PLT)</th>
+                            <th>출고후 총재고(EA)</th>
+                            <th>출고후 총재고(PLT)</th>
+                            <th>적재수량(PLT당)</th>
+                            <th>비고</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table_container">
+
+                    </tbody>
+
+                </table>
 
             </div>     
            
@@ -204,7 +241,7 @@
                             </button>                        
                         </div>
                         <div class="data_delD">
-                            <button id="data_trans" onclick="outdataTrans();">세부내역 창전환
+                            <button id="data_trans" onclick="outdataTrans();">세부내역 탭
 
                             </button>                        
                         </div>
@@ -272,193 +309,29 @@
        
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
         <script >
-            sendMessage();
-            var hiddenRefPath;
-            var fileNames=[];
+            alert(clientName+" 에서 관리하는 화주가 "+  consignorData + "  로 확인 됩니다."+"\n화주 확인후 업무 진행 바랍니다.!")
+            //sendMessage();
+            let hiddenRefPath;
+            let fileNames=[];
+            
+            function getOutcargoData(consignorData){
             let total_outcargo_count=0;
             let total_outcargo_qty=0;
             let total_outcargo_pty=0;
-            let table = document.createElement('table');
-            table.id = "table_data";
-            table.setAttribute("class","tableData");
-            table.addEventListener("click", (event) => {
-                if (event.target.tagName === "TD") {
-                  const row = event.target.parentNode;
-                  const confirm_message = "BL: "+row.cells[1].innerHTML+"\n"+"품명: "+row.cells[2].innerHTML+"\n"+"화물에 대한 출고등록을 진행 하시겠습니까?";
-                  const confirm_check = confirm(confirm_message);
-                  if(confirm_check){
-                  row.classList.toggle("confirm");                    
-                  var clicked_tr = document.createElement("tr");
-                  result_tbody.appendChild(clicked_tr);
-                  let clicked_td = null;
-                  let currentStock = parseInt(row.cells[7].innerHTML.replace(/[^0-9]/g,''));
-                  let currentPty = parseInt(row.cells[8].innerHTML.replace(/[^0-9]/g,''));
-                  if(isNaN(currentStock)){
-                    currentStock=0;} 
-                  if(isNaN(currentPty)){
-                    currentPty=0;}                                    
-                  let totalStock = parseInt(row.cells[9].innerHTML.replace(/[^0-9]/g,''));
-                  let totalPty = parseInt(row.cells[10].innerHTML.replace(/[^0-9]/g,''));
-                  if(isNaN(totalStock)){
-                    totalStock=0;} 
-                  if(isNaN(totalPty)){
-                    totalPty=0;}
-                  const stock_arr = [currentStock,currentPty,totalStock,totalPty];
-                  let loadQty = parseInt(row.cells[11].innerHTML.replace(/[^0-9]/g,''));
-                  const remark_info = row.cells[12].innerHTML;
-                  clicked_tr.id=row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML;
-                  console.log("cS:"+currentStock+"cP:"+currentPty+"lQ:"+loadQty); 
-                  for(var reV =0; reV<4;reV++){
-                    clicked_td = document.createElement("td");                    
-                    clicked_td.innerHTML = row.cells[reV].innerHTML;
-                    clicked_tr.appendChild(clicked_td);
-                  }
-                  var input_list = [currentStock,currentPty,""];
-                  for(var inC = 0; inC<5;inC++){
-                    qtyValue = currentStock;
-                    ptyValue = currentPty;
-                    clicked_td = document.createElement("td");
-                    clicked_td.value = input_list[inC];
-                    if(inC<3){
-                        const input_td = document.createElement("input");
-                        //input_td.onFocus=function() {
-                          //  alert("Input element has received focus!");
-                          //};
-                        if(inC==0){
-                            input_td.setAttribute("class","inputTdQty");
-                        }else if(inC==1){
-                            input_td.setAttribute("class","inputTdPty");
-                        }else{
-                            input_td.setAttribute("class","inputTdRemark")
-                        }                    
-                        input_td.addEventListener("change",(event)=>{
-                        const input_row = event.target.parentNode.parentNode;
-                        console.log("input_td Clicked"+input_row);
-                        /*const nodeC = event.target.parentNode;
-                        const indexCl =Array.from(input_row).indexOf(event.target.parentNode);*/
-                        const targetClassName =event.target.className;
-                        if(targetClassName=="inputTdQty"){
-                            const qtyValue = input_row.getElementsByTagName("input")[0].value;
-                            const aQtyValue = input_row.getElementsByTagName("td")[9].innerHTML;
-                            const aPtyValue = input_row.getElementsByTagName("td")[10].innerHTML;
-
-                            const ptyValue = qtyValue/loadQty;
-                            if(!Number.isInteger(ptyValue)){
-                                alert("출고요청 팔렛트 수량이 "+ptyValue+ "로 확인됩니다.정확한 수량 기입후 전송 바랍니다.")
-                            }
-                            input_row.getElementsByTagName("input")[1].value=ptyValue;
-                        }                   
-                    });                   
-                    input_td.value = input_list[inC];
-                    clicked_td.appendChild(input_td);
-                    }                    
-                    if(inC ==3){
-                        const input_btn = document.createElement("button");
-                        input_btn.addEventListener("click",(event) => {
-                            if (event.target.tagName === "BUTTON") {
-                              const select_row = event.target.parentNode.parentNode;
-                              const outQty = document.getElementById("out_qty");
-                              const outPty = document.getElementById("out_pqty");
-                              qtyValue = parseInt(select_row.getElementsByTagName("input")[0].value);
-                              ptyValue = parseInt(select_row.getElementsByTagName("input")[1].value);
-                              clicked_tr.classList.toggle("confirm");
-                              if(clicked_tr.className =="confirm"){
-                                outQty.value = parseInt(outQty.value)+parseInt(qtyValue);  
-                                outPty.value = parseInt(outPty.value)+parseInt(ptyValue);
-                                clicked_tr.cells[9].innerHTML = select_row.cells[9].innerHTML-qtyValue;clicked_tr.cells[10].innerHTML = select_row.cells[10].innerHTML -ptyValue;
-                                clicked_tr.cells[11].innerHTML = select_row.cells[11].innerHTML - qtyValue;
-                                clicked_tr.cells[12].innerHTML = select_row.cells[12].innerHTML - ptyValue;
-                                const aQty = parseInt(clicked_tr.cells[9].innerHTML);
-                                if(aQty<0){
-                                    const oQtyCheck=alert("출고 요청수량이 출고가능 수량을"+aQty +"초과했습니다!!."+"\n"+"출고 요청사항에 출고관련 세부사항 기입후 전송 바랍니다.");
-                                }
-                              }else{
-                                outQty.value = parseInt(outQty.value)-parseInt(qtyValue);  
-                                outPty.value = parseInt(outPty.value)-parseInt(ptyValue);
-                                clicked_tr.cells[9].innerHTML = parseInt(select_row.cells[9].innerHTML)+parseInt(qtyValue);
-                                clicked_tr.cells[10].innerHTML = parseInt(select_row.cells[10].innerHTML)+parseInt(ptyValue);
-                                clicked_tr.cells[11].innerHTML = parseInt(select_row.cells[11].innerHTML)+ qtyValue;
-                                clicked_tr.cells[12].innerHTML = parseInt(select_row.cells[12].innerHTML)+ parseInt(ptyValue);
-                              }
-                              
-                              }});
-                        input_btn.innerHTML="확인";
-                        input_btn.style.fontFamily="Helvetica Neue"
-                        input_btn.style.fontWeight="bold"
-                        //input_btn.style.height ="2vh"
-                        input_btn.style.fontSize ="0.1px"
-                        clicked_td.appendChild(input_btn);}
-                        if(inC==4){
-                        var input_rowdelete = document.createElement("button");
-                        input_rowdelete.innerHTML = "삭제";
-                        input_rowdelete.style.fontFamily="Helvetica Neue"
-                        input_rowdelete.style.fontWeight="bold"
-                        input_rowdelete.style.fontSize ="0.1px"
-                        //input_rowdelete.style.height ="2vh"
-                        input_rowdelete.addEventListener("click",(event)=>{
-                            if (event.target.tagName === "BUTTON") {
-                                const delete_row = event.target.parentNode.parentNode;
-                                const confirm_delete = confirm("BL: "+delete_row.cells[1].innerHTML+"\n품명: "+delete_row.cells[2].innerHTML+"\n"+"출고등록 내용 삭제 하시겠습니까?");
-                                if(confirm_delete){
-                                    if(clicked_tr.className =="confirm"){
-                                        const outQty = document.getElementById("out_qty");
-                                        const outPty = document.getElementById("out_pqty");
-                                        qtyValue = delete_row.getElementsByTagName("input")[0].value;
-                                        ptyValue = delete_row.getElementsByTagName("input")[1].value;
-                                        outQty.value = parseInt(outQty.value)-parseInt(qtyValue);  
-                                        outPty.value = parseInt(outPty.value)-parseInt(ptyValue);
-                                      }
-                                    delete_row.parentNode.removeChild(delete_row);
-                                }
-                            }
-                        });
-                        clicked_td.appendChild(input_rowdelete);
-                    }                  
-                    clicked_tr.appendChild(clicked_td);                    
-                  }
-                  for(var tdC =0;tdC<5;tdC++){
-                    if(tdC ==4){
-                    const clicked_load = document.createElement("td");   
-                    clicked_load.innerHTML=loadQty;
-                    clicked_tr.appendChild(clicked_load);
-                    clicked_td = document.createElement("td");
-                    clicked_td.innerHTML=remark_info;                   
-                    clicked_tr.appendChild(clicked_td);
-                    clicked_tdRefS = document.createElement("td");
-                    const refs = "DeptName/"+
-                    deptName+"/ConsignorValue/"+clientName+"/"+consignorName+"/"+"StockReport/"+row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML;
-                    clicked_tdRefS.innerHTML=refs;
-                    clicked_tdRefS.setAttribute("class","hidden");
-                    clicked_tr.appendChild(clicked_tdRefS);   
-                    }else{
-                    clicked_td = document.createElement("td");
-                    clicked_td.innerHTML=stock_arr[tdC];                    
-                    clicked_tr.appendChild(clicked_td);                        
-                    }                    
-                  }
-                }else if(row.classList=="confirm"){
-                    row.classList.toggle("confirm");
-                }                
-                }
-              });
-            let thead = document.createElement('thead');
-            let tbody = document.createElement('tbody');
-            tbody.setAttribute("id","table_container");
-            table.appendChild(thead);
-            table.appendChild(tbody);
-
+            let table = document.getElementById('table_data');
+            table.addEventListener("click", function(){tableClicked(event)});
             document.getElementById('table_div').appendChild(table);
-
             result_table= document.getElementById('results');
             let result_thead = document.createElement('thead');
-            let result_tbody = document.createElement('tbody');
+            let result_tbody = document.createElement("tboty");
+            let tbody = document.getElementById("table_container");
             result_table.appendChild(result_tbody);
 
             document.getElementById('result1').appendChild(result_table);
-            var clicked_info = [];
-            var clicked_item = new Array();
+            let clicked_info = [];
+            let clicked_item = new Array();
             const refValue = database_f.ref("DeptName/"+
-            deptName+"/ConsignorValue/"+clientName+"/"+consignorName+"/StockReport/");
+            deptName+"/ConsignorValue/"+clientName+"/"+consignorData+"/StockReport/");
             var ref_arr = new Array();
             refValue.get().then((snapshot)=>{
                 const value = Object.values(snapshot.val());
@@ -469,16 +342,7 @@
                 let totalCase = 0;
                 let totalQty = 0;
                 let totalPty = 0;
-                for(var key_iC =0; key_iC<head_title.length;key_iC++){
-                    const head_th = document.createElement("th");
-                    head_th.setAttribute("class", "sticky");
-                    if(key_iC>6){
-                        head_th.style.width="5vw";
-                    }
-                    head_th.innerHTML = head_title[key_iC];
-                    head_tr.appendChild(head_th);
-                }
-                thead.appendChild(head_tr);
+             
                 for(var refC =0;refC<value.length;refC++){
                     const body_tr= document.createElement('tr');
                     let total_ea;
@@ -508,6 +372,7 @@
                 document.getElementById("stock_total_pty").innerHTML ="총 재고 팔렛트 수량: "+totalPty+" PLT";
                                
             });
+            }
             
 
             function outcargo_submit(){
@@ -779,6 +644,169 @@
                 .catch(function(e){
                     console.log("Occured Error In Get Messaing Auth",e);
                 });
+            }
+            function tableClicked(event){
+                {
+                    if (event.target.tagName === "TD") {
+                      const row = event.target.parentNode;
+                      const confirm_message = "BL: "+row.cells[1].innerHTML+"\n"+"품명: "+row.cells[2].innerHTML+"\n"+"화물에 대한 출고등록을 진행 하시겠습니까?";
+                      const confirm_check = confirm(confirm_message);
+                      if(confirm_check){
+                      row.classList.toggle("confirm");                    
+                      var clicked_tr = document.createElement("tr");
+                      result_tbody.appendChild(clicked_tr);
+                      let clicked_td = null;
+                      let currentStock = parseInt(row.cells[7].innerHTML.replace(/[^0-9]/g,''));
+                      let currentPty = parseInt(row.cells[8].innerHTML.replace(/[^0-9]/g,''));
+                      if(isNaN(currentStock)){
+                        currentStock=0;} 
+                      if(isNaN(currentPty)){
+                        currentPty=0;}                                    
+                      let totalStock = parseInt(row.cells[9].innerHTML.replace(/[^0-9]/g,''));
+                      let totalPty = parseInt(row.cells[10].innerHTML.replace(/[^0-9]/g,''));
+                      if(isNaN(totalStock)){
+                        totalStock=0;} 
+                      if(isNaN(totalPty)){
+                        totalPty=0;}
+                      const stock_arr = [currentStock,currentPty,totalStock,totalPty];
+                      let loadQty = parseInt(row.cells[11].innerHTML.replace(/[^0-9]/g,''));
+                      const remark_info = row.cells[12].innerHTML;
+                      clicked_tr.id=row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML;
+                      console.log("cS:"+currentStock+"cP:"+currentPty+"lQ:"+loadQty); 
+                      for(var reV =0; reV<4;reV++){
+                        clicked_td = document.createElement("td");                    
+                        clicked_td.innerHTML = row.cells[reV].innerHTML;
+                        clicked_tr.appendChild(clicked_td);
+                      }
+                      var input_list = [currentStock,currentPty,""];
+                      for(var inC = 0; inC<5;inC++){
+                        qtyValue = currentStock;
+                        ptyValue = currentPty;
+                        clicked_td = document.createElement("td");
+                        clicked_td.value = input_list[inC];
+                        if(inC<3){
+                            const input_td = document.createElement("input");
+                            //input_td.onFocus=function() {
+                              //  alert("Input element has received focus!");
+                              //};
+                            if(inC==0){
+                                input_td.setAttribute("class","inputTdQty");
+                            }else if(inC==1){
+                                input_td.setAttribute("class","inputTdPty");
+                            }else{
+                                input_td.setAttribute("class","inputTdRemark")
+                            }                    
+                            input_td.addEventListener("change",(event)=>{
+                            const input_row = event.target.parentNode.parentNode;
+                            console.log("input_td Clicked"+input_row);
+                            /*const nodeC = event.target.parentNode;
+                            const indexCl =Array.from(input_row).indexOf(event.target.parentNode);*/
+                            const targetClassName =event.target.className;
+                            if(targetClassName=="inputTdQty"){
+                                const qtyValue = input_row.getElementsByTagName("input")[0].value;
+                                const aQtyValue = input_row.getElementsByTagName("td")[9].innerHTML;
+                                const aPtyValue = input_row.getElementsByTagName("td")[10].innerHTML;
+    
+                                const ptyValue = qtyValue/loadQty;
+                                if(!Number.isInteger(ptyValue)){
+                                    alert("출고요청 팔렛트 수량이 "+ptyValue+ "로 확인됩니다.정확한 수량 기입후 전송 바랍니다.")
+                                }
+                                input_row.getElementsByTagName("input")[1].value=ptyValue;
+                            }                   
+                        });                   
+                        input_td.value = input_list[inC];
+                        clicked_td.appendChild(input_td);
+                        }                    
+                        if(inC ==3){
+                            const input_btn = document.createElement("button");
+                            input_btn.addEventListener("click",(event) => {
+                                if (event.target.tagName === "BUTTON") {
+                                  const select_row = event.target.parentNode.parentNode;
+                                  const outQty = document.getElementById("out_qty");
+                                  const outPty = document.getElementById("out_pqty");
+                                  qtyValue = parseInt(select_row.getElementsByTagName("input")[0].value);
+                                  ptyValue = parseInt(select_row.getElementsByTagName("input")[1].value);
+                                  clicked_tr.classList.toggle("confirm");
+                                  if(clicked_tr.className =="confirm"){
+                                    outQty.value = parseInt(outQty.value)+parseInt(qtyValue);  
+                                    outPty.value = parseInt(outPty.value)+parseInt(ptyValue);
+                                    clicked_tr.cells[9].innerHTML = select_row.cells[9].innerHTML-qtyValue;clicked_tr.cells[10].innerHTML = select_row.cells[10].innerHTML -ptyValue;
+                                    clicked_tr.cells[11].innerHTML = select_row.cells[11].innerHTML - qtyValue;
+                                    clicked_tr.cells[12].innerHTML = select_row.cells[12].innerHTML - ptyValue;
+                                    const aQty = parseInt(clicked_tr.cells[9].innerHTML);
+                                    if(aQty<0){
+                                        const oQtyCheck=alert("출고 요청수량이 출고가능 수량을"+aQty +"초과했습니다!!."+"\n"+"출고 요청사항에 출고관련 세부사항 기입후 전송 바랍니다.");
+                                    }
+                                  }else{
+                                    outQty.value = parseInt(outQty.value)-parseInt(qtyValue);  
+                                    outPty.value = parseInt(outPty.value)-parseInt(ptyValue);
+                                    clicked_tr.cells[9].innerHTML = parseInt(select_row.cells[9].innerHTML)+parseInt(qtyValue);
+                                    clicked_tr.cells[10].innerHTML = parseInt(select_row.cells[10].innerHTML)+parseInt(ptyValue);
+                                    clicked_tr.cells[11].innerHTML = parseInt(select_row.cells[11].innerHTML)+ qtyValue;
+                                    clicked_tr.cells[12].innerHTML = parseInt(select_row.cells[12].innerHTML)+ parseInt(ptyValue);
+                                  }
+                                  
+                                  }});
+                            input_btn.innerHTML="확인";
+                            input_btn.style.fontFamily="Helvetica Neue"
+                            input_btn.style.fontWeight="bold"
+                            //input_btn.style.height ="2vh"
+                            input_btn.style.fontSize ="0.1px"
+                            clicked_td.appendChild(input_btn);}
+                            if(inC==4){
+                            var input_rowdelete = document.createElement("button");
+                            input_rowdelete.innerHTML = "삭제";
+                            input_rowdelete.style.fontFamily="Helvetica Neue"
+                            input_rowdelete.style.fontWeight="bold"
+                            input_rowdelete.style.fontSize ="0.1px"
+                            //input_rowdelete.style.height ="2vh"
+                            input_rowdelete.addEventListener("click",(event)=>{
+                                if (event.target.tagName === "BUTTON") {
+                                    const delete_row = event.target.parentNode.parentNode;
+                                    const confirm_delete = confirm("BL: "+delete_row.cells[1].innerHTML+"\n품명: "+delete_row.cells[2].innerHTML+"\n"+"출고등록 내용 삭제 하시겠습니까?");
+                                    if(confirm_delete){
+                                        if(clicked_tr.className =="confirm"){
+                                            const outQty = document.getElementById("out_qty");
+                                            const outPty = document.getElementById("out_pqty");
+                                            qtyValue = delete_row.getElementsByTagName("input")[0].value;
+                                            ptyValue = delete_row.getElementsByTagName("input")[1].value;
+                                            outQty.value = parseInt(outQty.value)-parseInt(qtyValue);  
+                                            outPty.value = parseInt(outPty.value)-parseInt(ptyValue);
+                                          }
+                                        delete_row.parentNode.removeChild(delete_row);
+                                    }
+                                }
+                            });
+                            clicked_td.appendChild(input_rowdelete);
+                        }                  
+                        clicked_tr.appendChild(clicked_td);                    
+                      }
+                      for(var tdC =0;tdC<5;tdC++){
+                        if(tdC ==4){
+                        const clicked_load = document.createElement("td");   
+                        clicked_load.innerHTML=loadQty;
+                        clicked_tr.appendChild(clicked_load);
+                        clicked_td = document.createElement("td");
+                        clicked_td.innerHTML=remark_info;                   
+                        clicked_tr.appendChild(clicked_td);
+                        clicked_tdRefS = document.createElement("td");
+                        const refs = "DeptName/"+
+                        deptName+"/ConsignorValue/"+clientName+"/"+consignorName+"/"+"StockReport/"+row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML;
+                        clicked_tdRefS.innerHTML=refs;
+                        clicked_tdRefS.setAttribute("class","hidden");
+                        clicked_tr.appendChild(clicked_tdRefS);   
+                        }else{
+                        clicked_td = document.createElement("td");
+                        clicked_td.innerHTML=stock_arr[tdC];                    
+                        clicked_tr.appendChild(clicked_td);                        
+                        }                    
+                      }
+                    }else if(row.classList=="confirm"){
+                        row.classList.toggle("confirm");
+                    }                
+                    }
+                  }
+                
             }
 
            
