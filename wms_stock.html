@@ -132,8 +132,8 @@
                             <th>품목</th>
                             <th>세부품목</th>
                             <th>반입수량(EA)</th>
-                            <th>반입요청수량(PLT)</th>
-                            <th>부족수량(SHORTAGE)_EA</th>
+                            <th>반입수량(PLT)</th>
+                            <th>부족수량(EA)</th>
                             <th>출고후 출고가능수량(EA)</th>
                             <th>출고후 출고가능수량(PLT)</th>
                             <th>출고후 총재고(EA)</th>
@@ -157,7 +157,7 @@
             
             <div id="outcargotitle">
                 <div class="resultDiv">
-                        <input  type="button"  value="출고일" id="out_date"/>   
+                        <input  type="date"  value="출고일" id="out_date"/>   
                         <script>
                             function transDate(dateT){
                                 let result_month = dateT.getMonth()+1;
@@ -172,9 +172,9 @@
                                 return result_date;
                             }
                             document.getElementById("out_date").value =transDate(new Date());
-                            $("#out_date").datepicker({
-                                language: 'ko'
-                            });
+                            // $("#out_date").datepicker({
+                            //     language: 'ko'
+                            // });
                         </script>    
                 </div>
                 <div class="result_title">
@@ -246,6 +246,9 @@
                             <th>비고</th>
                         </tr>
                     </thead>
+                    <tbody id="out_tbody">
+
+                    </tbody>
     
                 </table>
             </div>
@@ -257,11 +260,11 @@
                     
                     <div class="outcargoDate">
                         <div class="outcargoDateS">
-                            <input type="button" value="시작일" id="date_picker1" />
+                            <input type="date" value="시작일" id="date_picker1" />
                         </div>
                         
                         <div class="outcargoDateS">
-                            <input type="button" value="종료일" id="date_picker2" >
+                            <input type="date" value="종료일" id="date_picker2" >
                         </div>
                         <div class="outcargoDateS">
                             <input type="button" id="date_count" value="출고현황 검색" onclick="get_datecount()"/>
@@ -279,12 +282,12 @@
                         <script>
                             document.getElementById("date_picker1").value=transDate(new Date());
                             document.getElementById("date_picker2").value=transDate(new Date());
-                            $("#date_picker1").datepicker({
-                                language: 'ko'
-                            });
-                            $("#date_picker2").datepicker({
-                                language: 'ko'
-                            });
+                            // $("#date_picker1").datepicker({
+                            //     language: 'ko'
+                            // });
+                            // $("#date_picker2").datepicker({
+                            //     language: 'ko'
+                            // });
                             function get_datecount(){
                                 total_outcargo_count=0;
                                 total_outcargo_qty=0;
@@ -354,7 +357,7 @@
             document.getElementById('table_div').appendChild(table);
             result_table= document.getElementById('results');
             let result_thead = document.createElement('thead');
-            let result_tbody = document.createElement("tboty");
+            let result_tbody = document.getElementById("out_tbody");
             let tbody = document.getElementById("table_container");
             result_table.appendChild(result_tbody);
 
@@ -419,8 +422,10 @@
                 const qty = document.getElementById("out_qty").value;
                 const pqty = document.getElementById("out_pqty").value;
                 const result_table = document.getElementById("results");
+                let result_tbody = document.getElementById("out_tbody");
                 const result_table_rowsCount = result_table.rows.length-1;
                 const outcargo_data = [date,clientName,destination,qty,pqty];
+                const consignorName = document.getElementById("out_consignee").value;
                 const outcargo_ref = reg_time+"_"+clientName+"_"+consignorName+"_"+destination+"_"+qty+"(EA)_"+pqty+"(PLT)";
                 var outcargo_info = new Array();
                 var outcargo_remark = ""
@@ -469,6 +474,7 @@
                         result_table.removeChild(result_tbody); 
                         const reset_table=document.getElementById("results");
                         result_tbody = document.createElement("tbody");
+                        result_tbody.id="out_tbody";
                         reset_table.appendChild(result_tbody);
                         const confirmRow =document.querySelectorAll(".confirm");
                         for(var aC=0;aC<fileNames.length;aC++){
@@ -497,19 +503,25 @@
                 outcargo_attachmentDel();
                 getOutcargoResult(date); 
                 };
-                getOutcargoResult(date);    
+            getOutcargoResult(date);    
                 
             function getOutcargoResult(date){
                 const refString="DeptName/"+deptName+"/OutCargoReport/"+date+"/";
                 const refData=database_f.ref(refString);
+                console.log(date)
+                
                 refData.get().then((snapshot)=>{
                     if(snapshot.val()===null){
                         //alert(date+" 기간내 출고등록 건수 없습니다.");
                         return;
                     }
+                    const consignorName = document.getElementById("consignor").value;
                     const valueS = Object.values(snapshot.val());
                     const info_table = document.getElementById("outcargo_results");
                     const info_tbody = document.getElementById("outcargo_tbody");
+                    let total_outcargo_count=0;
+                    let total_outcargo_pty=0;
+                    let total_outcargo_qty=0;
                     for(var sC =0; sC<valueS.length;sC++){
                         const keyRef = Object.keys(snapshot.val())[sC];
                         const valueI = valueS[sC]["Info"];
@@ -523,7 +535,7 @@
                         const infoAdmin = valueI["Admin"];
                         const infoProcess = valueI["Process"];
                         const infoData =[infoConsignor,infoDate,infoDestination,infoQty,infoPty,infoRemark];
-                        
+                        console.log(infoConsignor+"/"+consignorName+"/"+infoDate+"/"+date)
                         if(infoDate == date && infoConsignor==consignorName){
                             
                             total_outcargo_qty=parseInt(total_outcargo_qty+parseInt(infoQty));
@@ -606,6 +618,7 @@
                 })
             };
             function outcargo_attachment(){
+                
                 const fileInput = document.getElementById("out_attachment");
                 const file = fileInput.files;
                 console.log(file);
@@ -619,7 +632,6 @@
                         fileN = fileN+file[fileC].name+",";
                     }
                 }
-                console.log('btn file upload fileNams Value:'+fileNames);
                 const labelFilename = document.getElementById("file_names");
                 labelFilename.innerHTML = fileN;
                 /*const storageRef =firebase.storage().ref();;
@@ -644,7 +656,7 @@
             function outdataDel(){
                 const delConfirm = confirm(hiddenRefPath+"\n"+"출고요청 자료를 삭제 하시겠습니까?");
                 if(delConfirm){
-                    const delPath=database_f.ref("DeptName/"+dept+"/OutCargoReport/"+hiddenRefPath);
+                    const delPath=database_f.ref("DeptName/"+deptName+"/OutCargoReport/"+hiddenRefPath);
                     delPath.remove().then(function() {
                         console.log("Child가 성공적으로 삭제되었습니다.");
                       })
@@ -659,6 +671,7 @@
             function outdataTrans(){
                 const dateS = document.getElementById("date_picker1").value;
                 const dateE = document.getElementById("date_picker2").value;
+                const consignorName = document.getElementById("out_consignee").value;
                 const dataInfo ={"dept":deptName,"client":clientName,"dateS":dateS,"dateE":dateE,"consignor":consignorName};
                 localStorage.setItem("BasicData",JSON.stringify(dataInfo));
                 window.open("wms_outcargoReport.html");
@@ -681,14 +694,15 @@
                 });
             }
             function tableClicked(event){
-                {
+                const consignorName = document.getElementById("out_consignee").value;
                     if (event.target.tagName === "TD") {
                       const row = event.target.parentNode;
                       const confirm_message = "BL: "+row.cells[1].innerHTML+"\n"+"품명: "+row.cells[2].innerHTML+"\n"+"화물에 대한 출고등록을 진행 하시겠습니까?";
                       const confirm_check = confirm(confirm_message);
                       if(confirm_check){
                       row.classList.toggle("confirm");                    
-                      var clicked_tr = document.createElement("tr");
+                      const clicked_tr = document.createElement("tr");
+                      const result_tbody = document.getElementById("out_tbody");
                       result_tbody.appendChild(clicked_tr);
                       let clicked_td = null;
                       let currentStock = parseInt(row.cells[7].innerHTML.replace(/[^0-9]/g,''));
@@ -726,6 +740,7 @@
                               //};
                             if(inC==0){
                                 input_td.setAttribute("class","inputTdQty");
+                                input_td.setAttribute("onFocus","this.value='';return true;")
                             }else if(inC==1){
                                 input_td.setAttribute("class","inputTdPty");
                             }else{
@@ -841,10 +856,6 @@
                     }                
                     }
                   }
-                
-            }
-
-           
         </script>
        
         

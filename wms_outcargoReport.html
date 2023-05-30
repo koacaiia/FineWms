@@ -76,7 +76,7 @@
         
         .afterDivSubBtn ,.beforeDivInfo{
             display:grid;
-            grid-template-columns:2fr 5fr 1fr 1fr 1fr;
+            grid-template-columns:2fr 5fr 1fr 1fr ;
             grid-gap:1vw;
             margin-top:2vh;
             margin-bottom:2vh;
@@ -135,16 +135,20 @@
             font-size: small;
             background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
         }
-        .hidden{
-            display:none;
-        }
         .active{
             display:table-cell;
         }
         #clientDiv{
             display:grid;
             grid-template-columns:1fr 1fr;
+            grid-gap:10%;
             height:100%;
+        }
+        #sel_consignor,#date_picker1,#date_picker2{
+            text-align: center;
+        }
+        thead{
+            background:gray;
         }
         
     </style>
@@ -158,56 +162,20 @@
                 <select id="sel_consignor" title="화주명" >
                 </select>
                 <script>
-                    var basicData= JSON.parse(localStorage.getItem("BasicData"));
-                    var clientName=basicData["client"];
-                    var consignorName = basicData["consignor"];
-                    var deptName = basicData["dept"];
-                    console.log(clientName+consignorName);
-                    if(clientName!=null){
-                        const sel = document.getElementById("sel_client");
-                        const op = document.createElement("Option");
-                        op.value=clientName;
-                        op.text=clientName;
-                        sel.appendChild(op);
-                        const sel_con = document.getElementById("sel_consignor");
-                        const opC = document.createElement("Option");
-                        opC.value=consignorName;
-                        opC.text=consignorName;
-                        sel_con.appendChild(opC);
-                    }else{
-                        const refPath="DeptName/"+deptName+"/ConsignorValue";
-                        const refValue = database_f.ref(refPath);
-                        refValue.get().then((snapshot=>{
-                            const value= snapshot.val();
-                            const valueKey = Object.keys(value);
-                            const valueValue = Object.values(value);
-                            const sel = document.getElementById("sel_client");
-                            const op = document.createElement("Option");
-                            op.value="모든거래처";
-                            op.text="모든거래처";
-                            sel.appendChild(op);
-                            for(let k in valueKey){
-                                const clientKey = Object.keys(valueValue[k]);
-                                const op = document.createElement("Option");
-                                    op.value= valueKey[k];
-                                    op.text = valueKey[k];
-                                    sel.appendChild(op);
-                            }
-                        }))
-                    }
+                    
                 </script>
                 
             </div>
             
             <div class="outcargoDate">
                 <div class="outcargoDateS">
-                    <input type="button" value="시작일" id="date_picker1" />
+                    <input type="date" value="시작일" id="date_picker1" required pattern="\d{4}-\d{2}-\d{2}"/>
                 </div>
                 <div class="outcargoDateS">
                     <h1>~</h1>
                 </div>
                 <div class="outcargoDateS">
-                    <input type="button" value="종료일" id="date_picker2" >
+                    <input type="date" value="종료일" id="date_picker2" >
                 </div>
                 <div class="outcargoDateS">
                     <input type="button" id="date_count" value="출고현황 검색" onclick="get_datecount()"/>
@@ -227,23 +195,23 @@
                     }
                     document.getElementById("date_picker1").value=transDate(new Date());
                     document.getElementById("date_picker2").value=transDate(new Date());
-                    $("#date_picker1").datepicker({
-                        language: 'ko'
-                    });
-                    $("#date_picker2").datepicker({
-                        language: 'ko'
-                    });
+                    // $("#date_picker1").datepicker({
+                    //     language: 'ko'
+                    // });
+                    // $("#date_picker2").datepicker({
+                    //     language: 'ko'
+                    // });
                 </script>
             </div> 
-            <button class="outcargoDateS" id="btn_forwardingFee" onclick="forwardingFee();">기간내 출고료 정산</button>
+            <!-- <button class="outcargoDateS" id="btn_forwardingFee" onclick="forwardingFee();">기간내 출고료 정산</button> -->
             <button class="outcargoDateS" id="btn_storageFee" onclick="storageFee();">기간내 재고<br>보관료 정산</button>
             <button class="outcargoDateS" id="btn_excelFile" onclick="excelFile();">Excel File</button> 
 
         </div>
             <div class="afterTableContainer">
-                <table class="afterTable">
+                <table id="table_data" class="afterTable">
                     <thead>
-                        <tr>
+                        <tr id="tr_forward">
                             <th>화주명</th>
                             <th>출고일</th>
                             <th>출고처</th>
@@ -253,12 +221,34 @@
                             <th>출고요청수량<br>(EA)</th>
                             <th>출고요청수량<br>(PLT)</th>
                             <th>출고요청사항</th>
-                            <th class="hidden">보관료발생일</th>
+                            <!-- <th class="hidden">보관료발생일</th>
                             <th class="hidden">보관료적용일수</th>
                             <th class="hidden">보관요율(팔렛트당)</th>
-                            <th class="hidden">출고보관료</th>
+                            <th class="hidden">출고보관료</th> -->
+                        </tr>
+                        <tr id="tr_storage">
+                            <th>반입일</th>
+                            <th>BL</th>
+                            <th>내국관리번호</th>
+                            <th>품목</th>
+                            <th>총재고수량(EA)</th>
+                            <th>총재고수량(PLT)</th>
+                            <th>당월출고수량</th>
+                            <th>적재수량</th>
+                            <th>보관료발생일</th>
+                            <th>프리타임</th>
+                            <th>보관요율(팔렛트당)</th>
+                            <th>출고보관료</th>
+                            <th>재고보관료</th>
+                            <th>총보관료</th>
+                            <th>팔렛트 보관료</th>
+                            <th>팔레트보관료 발생일</th>
+
                         </tr>
                     </thead>
+                    <tbody id="outcargo_tbody">
+
+                    </tbody>
                     
                 </table>
             </div>
@@ -266,12 +256,63 @@
         </div>
     </div>
     <script>
-        var deptV ="fine2";
-        var client;
-        var dateS;
-        var dateE;
-        var thList =["화주명","출고일","출고처","BL","품명","Lot","출고요청수량(EA)","출고요청수량(PLT)","출고요청사항","보관료발생일","보관요율(팔렛트당)","출고보관료"];
+        const nondisTr = document.getElementById("tr_storage");
+        const disTr = document.getElementById("tr_forward");
+        nondisTr.style.display = "none";
+        const basicData= JSON.parse(localStorage.getItem("BasicData"));
+        const thList =["화주명","출고일","출고처","BL","품명","Lot","출고요청수량(EA)","출고요청수량(PLT)","출고요청사항"]
+        const thListFee=["보관료발생일","출고 보관료 적용일수","보관요율(팔렛트당)","출고보관료"];
         const basicDataL = Object.keys(basicData).length;
+        const clientName=basicData["client"];
+        const consignorName = basicData["consignor"];
+        const deptName = basicData["dept"];
+        if(clientName!=null){
+                const sel = document.getElementById("sel_client");
+                const op = document.createElement("Option");
+                op.value=clientName;
+                op.text=clientName;
+                sel.appendChild(op);
+                const sel_con = document.getElementById("sel_consignor");
+                const opC = document.createElement("Option");
+                opC.value=consignorName;
+                opC.text=consignorName;
+                sel_con.appendChild(opC);
+                document.getElementById("btn_storageFee").classList.toggle("hidden");
+                document.title="출고자료(거래처)"
+            }else{
+                document.title="출고자료(관리자)"
+                const thR = document.getElementsByTagName("tr")[0];
+                for(let hC in thListFee){
+                    const th = document.createElement("th");
+                    th.innerHTML=thListFee[hC];
+                    thR.appendChild(th);
+                }
+                const refPath="DeptName/"+deptName+"/ConsignorValue";
+                const refValue = database_f.ref(refPath);
+                refValue.get().then((snapshot=>{
+                    const value= snapshot.val();
+                    const valueKey = Object.keys(value);
+                    const valueValue = Object.values(value);
+                    const sel = document.getElementById("sel_client");
+                    const op = document.createElement("Option");
+                    op.value="모든거래처";
+                    op.text="모든거래처";
+                    sel.appendChild(op);
+                    for(let k in valueKey){
+                        const clientKey = Object.keys(valueValue[k]);
+                        const op = document.createElement("Option");
+                            op.value= valueKey[k];
+                            op.text = valueKey[k];
+                            sel.appendChild(op);
+                    }
+                }));
+                
+            }
+        let deptV ="fine2";
+        let client;
+        let dateS;
+        let dateE;
+       
         var totalQtyO={};
         var totalOFee={};
         if(basicData["dateS"]!=null){
@@ -284,6 +325,8 @@
         };
         
         function getOutcargoReport(date){
+            disTr.style.display ="table-row";
+            nondisTr.style.display="none";            
             const clientValue = document.getElementById("sel_client").value;
             const refPath="DeptName/"+deptName+"/OutCargoReport/"+date;
             const refValue = database_f.ref(refPath);
@@ -291,22 +334,20 @@
             refValue.get().then((snapshot)=>{
                 const snapValue = snapshot.val();
                 if(snapValue==null){
-                    //alert(date+" 출고자료 없는것으로 확인 됩니다.");
                     return;
                 }
                 const clientValue = Object.keys(snapValue);
                 let aTable = document.getElementsByClassName("afterTable")[0];
                 let aTbody = document.getElementById("outcargo_tbody");
                 
-                for(let keyC=0;keyC<clientValue.length;keyC++){
+                for(var keyC=0;keyC<clientValue.length;keyC++){
                     let outcargoReportC = snapValue[clientValue[keyC]]["Content"];
                     let outcargoReportI = snapValue[clientValue[keyC]]["Info"];
-                    let clientName = document.getElementById("sel_client").value;
-                    const clientNameT = JSON.parse(localStorage.getItem("BasicData"))["client"];
-                    if(clientNameT==null){
-                        clientName=outcargoReportI["화주명"];
+                    let clientName1 = document.getElementById("sel_consignor").value;
+                    if(clientName1==null){
+                        clientName1=outcargoReportI["화주명"];
                     }
-                    if(date==outcargoReportI["출고일"]&&clientName ==outcargoReportI["화주명"]){
+                    if(date==outcargoReportI["출고일"]&&clientName1 ==outcargoReportI["화주명"]){
                     let infoC =Object.keys(outcargoReportI);
                     let outcargoRec =Object.keys(outcargoReportC);
                     let outcargoL = outcargoRec.length;
@@ -320,7 +361,7 @@
                         let targetTable = aTbody.getElementsByClassName("subTable")[rowsIndex];
                         targetTable.classList.toggle("active");
                     })
-                    for(var m=0;m<thList.length-3;m++){
+                    for(var m=0;m<thList.length;m++){
                         if(outcargoReportC["Process"]!="Holding"||outcargoReportC["Process"]!=null){
                             let aTd = document.createElement("td");
                             aTd.innerHTML = outcargoReportC[outcargoRec[cL]][thList[m]];
@@ -332,7 +373,8 @@
                         }
                     }
                     aTbody.appendChild(aTr);
-                    const refPath = outcargoReportC[outcargoRec[cL]]["refS"];
+                    if(clientName === undefined){
+                        const refPath = outcargoReportC[outcargoRec[cL]]["refS"];
                     const refStock = database_f.ref(refPath);
                     refStock.get().then((snapshot=>{
                         const value= snapshot.val();
@@ -340,6 +382,14 @@
                         const storageDate = value["보관료발생일"];
                         const outDate = new Date(outcargoReportI["출고일"]);
                         const inDate = new Date(value["반입일"]);
+                        const refPathSplit= refPath.split("/")[6];
+                        console.log(totalQtyO[refPathSplit]);
+                        if(totalQtyO[refPathSplit]==undefined){
+                            totalQtyO[refPathSplit]=0;
+                        }
+                        console.log(totalQtyO[refPathSplit]);
+                        totalQtyO[refPathSplit]=parseInt(totalQtyO[refPathSplit])+parseInt(outPty);
+                        console.log(totalQtyO);
                         const firstDate = new Date(outDate.getFullYear(),outDate.getMonth(),1);
                         const storageDateApply = transDate(new Date(document.getElementById("date_picker1").value));
                         let storageFeeDate;
@@ -351,7 +401,9 @@
                             outcargoFee=0;
                             elapseDate="In FreeTime";
                         }else if(new Date(storageDate)>new Date(storageDateApply)){
+                            
                             storageFeeDate = storageDate;
+                            console.log(elapseDate+"1"+storageFeeDate);
                             curDate = new Date(storageFeeDate);
                             while(curDate<=outDate){
                                 countDateList.push(transDate(curDate));
@@ -361,10 +413,12 @@
                             outcargoFee = parseInt(elapseDate)*parseInt(outPty)*parseInt(storageFee);
                         }else{
                             storageFeeDate = storageDateApply;
+                            console.log(elapseDate+"2"+storageFeeDate);
                             curDate = new Date(storageFeeDate);
                             while(curDate<=outDate){
                                 countDateList.push(transDate(curDate));
-                                curDate.setDate(curDate.getDate() +1)
+                                curDate.setDate(curDate.getDate() +1);
+                                elapseDate =elapseDate +1;
                             }
                             outcargoFee = parseInt(elapseDate)*parseInt(outPty)*parseInt(storageFee);
                         }
@@ -384,7 +438,6 @@
                                 td.innerHTML=outcargoFee;
                                 break;
                             }
-                            td.setAttribute("class","hidden");
                             aTr.appendChild(td);
                         }
                         aTbody.appendChild(aTr);
@@ -392,23 +445,26 @@
                     }
                 }
                 }
-                });
-        }
+                }});
+            }       
         function get_datecount(){
+            const clientName = document.getElementById("sel_client").value;
+            if(clientName ==="모든거래처"){
+                alert("거래처 선택후 검색 바랍니다.");
+                return;
+            }
             const tBodyEle= document.getElementById("outcargo_tbody");
             if(tBodyEle !== null){
                 console.log("element Checked!");
-                tBodyEle.remove();
+                tBodyEle.replaceChildren();
             }
             let aTable = document.getElementsByClassName("afterTable")[0];
-            let aTbody = document.createElement("tbody");
-            aTbody.id="outcargo_tbody";
+            let aTbody = document.getElementById("outcargo_tbody");
             aTbody.setAttribute("class","aTbody");
-            aTable.appendChild(aTbody);
             //sDate = new Date(document.getElementById("date_picker1").value);
             //eDate = new Date(document.getElementById("date_picker2").value);
             sDate = new Date("2023-05-08");
-            eDate = new Date("2023-05-20");
+            eDate = new Date("2023-05-30");
             var curDate = sDate;
             const countDateList = []
             while(curDate<=eDate){
@@ -435,22 +491,13 @@
             }
         }
         function storageFee(){
-            const table=document.getElementsByClassName("afterTable")[0];
-            table.replaceChildren();
-            const tHr = document.createElement("tr");
-            const tHead = document.createElement("thead");
-            const tBody = document.createElement("tbody");
-            tHead.appendChild(tHr);
-            table.appendChild(tHead);
-            table.appendChild(tBody);
+            nondisTr.style.display="table-row";
+            disTr.style.display="none";
+            const tBody = document.getElementById("outcargo_tbody");
+            tBody.replaceChildren();
             const clientV = document.getElementById("sel_client").value;
             const conV = document.getElementById("sel_consignor").value;
             const thList =["반입일","BL","내국관리번호","품목","총재고수량(EA)","총재고수량(PLT)","	당월출고수량","적재수량(PLT당)","보관료발생일","프리타임","보관요율(팔렛트당)","출고보관료",	"재고보관료","총보관료","팔렛트 보관료","팔레트보관료 발생일"];
-            for(let thC in thList){
-                const thTd = document.createElement("td"); 
-                thTd.innerHTML = thList[thC];
-                tHr.appendChild(thTd);
-            }
             if(clientV=="모든거래처"){
                 alert(consigName +" 로 확인 됩니다."+"\n"+"거래처 확인후 정산 확인 바랍니다.!");
                 return;
@@ -458,14 +505,39 @@
             const refPath=database_f.ref("DeptName/"+deptName+"/ConsignorValue/"+clientV+"/"+conV+"/StockReport/");
             refPath.get().then((snapshot)=>{
                 const snapV = Object.values(snapshot.val());
-                const snapK = Object.keys(snapshot.val());
+                const snapK = Object.values(snapshot.val());
+                const storageDateS = transDate(new Date(document.getElementById("date_picker1").
+                value));
+                const storageDateE = transDate(new Date(document.getElementById("date_picker2").value));
+                
                 for(let sC in snapV){
                     const tr = document.createElement("tr");
-                    console.log(snapK[sC]);
-                    
-                    for(let tdC in thList){
+                    const inDate = new Date(snapV[sC]["반입일"]);
+                    const applyDate = new Date(snapV[sC]["보관료발생일"]);
+                    const storageFeeS = snapV[sC]["보관요율(팔렛트당)"]
+                    let elapseDateS;
+                    let storageFeeDateS;
+                    const monthOutQ ="DEV"
+                    const test = storageDateS>applyDate;
+                    if(test){
+                        storageFeeS=0;
+                    }
+
+                    for(var tdC=0;tdC<thList.length;tdC++){
                         const td = document.createElement("td");
+                        if(tdC ==6||tdC==11||tdC==12||tdC==13||tdC==15){
+                            switch(tdC){
+                                case 6:
+                                td.innerHTML=monthOutQ;
+                                console.log(td+monthOutQ);
+                                break;
+                                case 15:
+                                td.innerHTML="DEV";
+                                break;
+                            }
+                        }else{
                         td.innerHTML = snapV[sC][thList[tdC]];
+                        }
                         tr.appendChild(td);
                     }
                     tBody.appendChild(tr);
@@ -479,7 +551,6 @@
             consignEle.replaceChildren();
             clientValue.get().then((snapshot)=>{
                 const snapValue = snapshot.val();
-                console.log(snapValue);
                 const consignValue = Object.keys(snapValue);
                 for(let cC in consignValue){
                     const opC = document.createElement("option");
@@ -488,6 +559,12 @@
                     consignEle.appendChild(opC);
                 }
             })
+
+        }
+        function excelFile(){
+            const fileName = deptName+"_"+clientName+" 출고현황("+dateS+"~"+dateE+").xlsx";
+                    const wb = XLSX.utils.table_to_book(document.getElementById('table_data'), {sheet:"test",raw:true});
+                    XLSX.writeFile(wb, (fileName));
 
         }
         

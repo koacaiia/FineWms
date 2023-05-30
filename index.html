@@ -146,7 +146,7 @@
             </div >
             <input type="password" value="비밀번호" id="pw"onFocus="this.value='';return true;">
             <button id="btn" value="Confirm" onclick="btn_reg()">거래처 Log In</button>
-           
+            <button id="btn_reg" value="Confirm" onclick="reg(this)">신규등록</button>
 
         </div>
         
@@ -239,6 +239,13 @@
             sData.classList.toggle("active");
             oData.classList.toggle("active");
             oDataR.classList.toggle("active");
+        }
+        function reg(event){
+            const secondPw = prompt("비밀번호 다시한번 기입 바랍니다.","비밀번호 확인");
+            const firstPw = document.getElementById("pw").value;
+            if(firstPw===secondPw){
+                console.log("Same Password");
+            }
         }
        
     </script>
