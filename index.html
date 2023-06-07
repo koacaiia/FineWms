@@ -53,10 +53,10 @@
         }
         #sel_client_div,#log,#adLog{
             display:grid;
-            grid-template-columns:1fr 1fr 1fr;
+            grid-template-columns:1fr 1fr 1fr 0.5fr;
         }
-        #sel_consignor,#btn,#adBtn{
-            width:60%;
+        #sel_consignor,#btn,#adBtn,#btn_regC,#btn_regA{
+            width:80%;
             height:90%;
             background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
             border-radius:5px;
@@ -89,6 +89,10 @@
         #logo{
             background:url("fineLog.png");
             background-size:100% 100%;
+        }
+        #stock_reg{
+            font-weight:bolder;
+            background: linear-gradient(to top, black,5%, rgb(238, 241, 244));
         }
         
         
@@ -141,12 +145,10 @@
         <h3> 거래처 로그인</h3>
         <h5> 업체명 입력과 등록 비밀번호 입력후 거래처 Log In 버튼 클릭 바랍니다.</h5>
         <div id="sel_client_div">
-            <div >
-                <input type="text" value="업체명" id="id" onFocus="this.value='';return true;"onchange="selClient();">
-            </div >
+            <input type="text" value="업체명" id="id" onFocus="this.value='';return true;">
             <input type="password" value="비밀번호" id="pw"onFocus="this.value='';return true;">
             <button id="btn" value="Confirm" onclick="btn_reg()">거래처 Log In</button>
-            <button id="btn_reg" value="Confirm" onclick="reg(this)">신규등록</button>
+            <button id="btn_regC" value="Confirm" onclick="reg(this)">신규등록</button>
 
         </div>
         
@@ -165,11 +167,12 @@
             <input type="text" value="담당자" id="adId"onFocus="this.value='';return true;">
             <input type="password" value="비밀번호" id="adPw"onFocus="this.value='';return true;">
             <button id="adBtn" value="Confirm" onclick="btn_logA()">관리자 Log In</button>
+            <button id="btn_regA" value="Confirm" onclick="reg(this)">신규등록</button>
         </div>
-        
+            <input id="stock_reg" class="adBtn" type="button" value="출고자료 등록,수정" onclick="btn_administrator_outcargoU()">  
             <input class="adBtn" type="button" value="재고목록 신규등록,수정" onclick="btn_administrator_stock()">
-            <input class="adBtn" type="button" value="출고자료 현황 조회" onclick="btn_administrator_outcargoD()">
-            <input class="adBtn" type="button" value="출고자료 등록,수정" onclick="btn_administrator_outcargoU()">  
+            <input class="adBtn" type="button" value="출고자료 현황 조회(정산)" onclick="btn_administrator_outcargoD()">
+            
         
        
     </div>
@@ -178,7 +181,6 @@
     </div>
     
     <script>
-        let consignValue=["CMS"];
         const actionCodeSettings = {
             // URL you want to redirect back to. The domain (www.example.com) for this
             // URL must be in the authorized domains list in the Firebase Console.
@@ -196,16 +198,34 @@
             dynamicLinkDomain: 'https://finecargoinformation.firebaseapp.com/__/auth/action?mode=action&oobCode=code'
           };
         function btn_reg(){
-            var stock_link = 'wms_stock.html';
-            const clientValue = document.getElementById("id").value;
+            const acc = document.getElementById("id").value;
             const deptValue = document.getElementById("sel_dept").value;
-            const dataInfo ={"client" : clientValue,"dept":deptValue,"consignor":consignValue};
-            localStorage.setItem("BasicData",JSON.stringify(dataInfo));
-            window.location.href="wms_stock.html";
+            const pw = document.getElementById("pw").value;
+            database_f.ref("DeptName/"+deptValue+"/LogInfo").get().then(function(event){
+                const accKey = Object.keys(event.val());
+                if(accKey.includes(acc)){
+                    const pwIn = Object.values(event.val()[acc])[0];
+                    if(pw===pwIn){
+                        const dataInfo ={"client" : acc,"dept":deptValue};
+                        localStorage.setItem("BasicData",JSON.stringify(dataInfo));
+                        // window.location.href="wms_stock.html";
+                        window.open("wms_stock.html");
+                    }else{
+                        alert(acc+" 비밀번호 틀립니다. 확인후 다시 Log In 바랍니다.!")
+                    }
+                }else{
+                    alert(acc+" 업체명 DataBase 등록 자료 없습니다.\n신규등록 진행후 Log In 바랍니다.!")
+                }
+
+            });
+            
         }
         function btn_administrator_outcargoU(){
             window.location.href="wms_reg.html";
         }function btn_administrator_stock(){
+            const deptValue = document.getElementById("sel_dept").value;
+            const dataInfo ={"dept":deptValue};
+            localStorage.setItem("BasicData",JSON.stringify(dataInfo));
             window.location.href="wms_upload.html";
         }
         function btn_administrator_outcargoD(){
@@ -214,38 +234,83 @@
             localStorage.setItem("BasicData",JSON.stringify(dataInfo));
             window.location.href="wms_outcargoReport.html";
         }
-        function selClient(){
-            const clientValue = document.getElementById("id").value;
+       
+        function btn_logA(){
+            const acc = document.getElementById("adId").value;
             const deptValue = document.getElementById("sel_dept").value;
-            const refPath = database_f.ref("DeptName/"+deptValue+"/ConsignorValue/"+clientValue);
-            refPath.get().then((snapshot)=>{
-                const snapV = snapshot.val();
-                const snapKeys = Object.keys(snapV);
-                const sel = document.getElementById("sel_consignor");
-                for(let sC in snapKeys){
-                    consignValue.push(snapKeys[sC]);
-                    const op = document.createElement("option");
-                    op.value= snapKeys[sC];
-                    op.text = snapKeys[sC];
-                    sel.appendChild(op);
+            const pw = document.getElementById("adPw").value;
+            database_f.ref("DeptName/"+deptValue+"/LogInfo").get().then(function(event){
+                const accKey = Object.keys(event.val());
+                if(accKey.includes(acc)){
+                    const pwIn = Object.values(event.val()[acc])[0];
+                    if(pw===pwIn){
+                        for(i=0;i<3;i++){
+                            document.getElementsByClassName("adBtn")[i].classList.toggle("active");
+                        // document.getElementsByClassName("adBtn")[1].classList.toggld("active");
+                        // document.getElementsByClassName("adBtn")[2].classList.toggle("active");
+                        };
+                    }else{
+                        alert(acc+" 비밀번호 틀립니다. 확인후 다시 Log In 바랍니다.!")
+                    }
+                }else{
+                    alert(acc+" 담당자명 DataBase 등록 자료 없습니다.\n신규등록 진행후 Log In 바랍니다.!")
                 }
 
             });
-        }
-        function btn_logA(){
-            const sData = document.getElementsByClassName("adBtn")[0];
-            const oData= document.getElementsByClassName("adBtn")[1];
-            const oDataR = document.getElementsByClassName("adBtn")[2];
-            sData.classList.toggle("active");
-            oData.classList.toggle("active");
-            oDataR.classList.toggle("active");
+            
         }
         function reg(event){
-            const secondPw = prompt("비밀번호 다시한번 기입 바랍니다.","비밀번호 확인");
-            const firstPw = document.getElementById("pw").value;
-            if(firstPw===secondPw){
-                console.log("Same Password");
+            const divValue = event.parentNode;
+            const account=divValue.getElementsByTagName("input")[0].value;
+            const pw = divValue.getElementsByTagName("input")[1].value;
+            const deptValue = document.getElementById("sel_dept").value;
+            let accValue;
+            if(divValue=="sel_client_div"){
+                accValue="업체명";
+            }else{
+                accValue= deptValue+" 담당자";
             }
+            database_f.ref("DeptName/"+deptValue+"/LogInfo/").get().then((snapshot)=>{
+                console.log(snapshot.val());
+                if(snapshot.val()!=null){
+                    const logAcc = Object.keys(snapshot.val());
+                    console.log(logAcc);
+                if(logAcc.includes(account)){
+                    console.log(logAcc);
+                    alert("기존 등록명("+account+")이 있습니다.다시 확인 바랍니다.");
+                    return;
+                }else{
+                    const secondPw = prompt(accValue+ ": "+account+"\n비밀번호 다시한번 기입 바랍니다.","비밀번호 확인");
+                    if(pw===secondPw){
+                        database_f.ref("DeptName/"+deptValue+"/LogInfo/"+account).set({"Password":pw})
+                        .then(function(){
+                            alert(account+" 사용자 등록 완료 되었습니다!.");
+                        })
+                        .catch(function(error){
+                            alert(error+ " 에러 확인 다시 진행 바랍니다!.");
+                        });
+                    }else{
+                        alert(accValue+ ": "+account+"\n입력된 비밀번호가 틀립니다.다시 확인 바랍니다.")
+                    }
+                }
+                }else{
+                    const secondPw = prompt(accValue+ ": "+account+"\n비밀번호 다시한번 기입 바랍니다.","비밀번호 확인");
+                    if(pw===secondPw){
+                        database_f.ref("DeptName/"+deptValue+"/LogInfo/"+account).set({"Password":pw})
+                        .then(function(){
+                            alert(account+" 사용자 등록 완료 되었습니다!.");
+                        })
+                        .catch(function(error){
+                            alert(error+ " 에러 확인 다시 진행 바랍니다!.");
+                        });
+                    }else{
+                        alert(accValue+ ": "+account+"\n입력된 비밀번호가 틀립니다.다시 확인 바랍니다.")
+                    }
+
+                }
+              
+            });
+           
         }
        
     </script>

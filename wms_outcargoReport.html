@@ -212,8 +212,8 @@
                 <table id="table_data" class="afterTable">
                     <thead>
                         <tr id="tr_forward">
-                            <th>화주명</th>
                             <th>출고일</th>
+                            <th>요청시간</th>
                             <th>출고처</th>
                             <th>BL</th>
                             <th>품명</th>
@@ -260,7 +260,7 @@
         const disTr = document.getElementById("tr_forward");
         nondisTr.style.display = "none";
         const basicData= JSON.parse(localStorage.getItem("BasicData"));
-        const thList =["화주명","출고일","출고처","BL","품명","Lot","출고요청수량(EA)","출고요청수량(PLT)","출고요청사항"]
+        const thList =["출고일","요청시간","출고처","BL","품명","Lot","출고요청수량(EA)","출고요청수량(PLT)","출고요청사항"]
         const thListFee=["보관료발생일","출고 보관료 적용일수","보관요율(팔렛트당)","출고보관료"];
         const basicDataL = Object.keys(basicData).length;
         const clientName=basicData["client"];
@@ -336,6 +336,7 @@
                 if(snapValue==null){
                     return;
                 }
+                
                 const clientValue = Object.keys(snapValue);
                 let aTable = document.getElementsByClassName("afterTable")[0];
                 let aTbody = document.getElementById("outcargo_tbody");
@@ -348,6 +349,7 @@
                         clientName1=outcargoReportI["화주명"];
                     }
                     if(date==outcargoReportI["출고일"]&&clientName1 ==outcargoReportI["화주명"]){
+                    const timeOut = clientValue[keyC].split("_")[0];
                     let infoC =Object.keys(outcargoReportI);
                     let outcargoRec =Object.keys(outcargoReportC);
                     let outcargoL = outcargoRec.length;
@@ -362,14 +364,15 @@
                         targetTable.classList.toggle("active");
                     })
                     for(var m=0;m<thList.length;m++){
-                        if(outcargoReportC["Process"]!="Holding"||outcargoReportC["Process"]!=null){
-                            let aTd = document.createElement("td");
-                            aTd.innerHTML = outcargoReportC[outcargoRec[cL]][thList[m]];
-                            aTr.appendChild(aTd);
-                        }else{
-                            let aTd = document.createElement("td");
-                            aTd.innerHTML = outcargoReportC[outcargoReC[cL]][thList[m]];
-                            aTr.appendChild(aTd);
+                        let aTd = document.createElement("td");
+                        if(m==1){
+                                aTd.innerHTML=timeOut;
+                            }else{
+                                aTd.innerHTML = outcargoReportC[outcargoRec[cL]][thList[m]];
+                            }
+                        aTr.appendChild(aTd);
+                        if(outcargoReportC[outcargoRec[cL]]["Process"]!="Completion"){
+                                aTr.style.background="#CCE5FF";
                         }
                     }
                     aTbody.appendChild(aTr);
@@ -461,11 +464,11 @@
             let aTable = document.getElementsByClassName("afterTable")[0];
             let aTbody = document.getElementById("outcargo_tbody");
             aTbody.setAttribute("class","aTbody");
-            //sDate = new Date(document.getElementById("date_picker1").value);
-            //eDate = new Date(document.getElementById("date_picker2").value);
-            sDate = new Date("2023-05-08");
-            eDate = new Date("2023-05-30");
-            var curDate = sDate;
+            sDate = new Date(document.getElementById("date_picker1").value);
+            eDate = new Date(document.getElementById("date_picker2").value);
+            // sDate = new Date("2023-05-08");
+            // eDate = new Date("2023-05-30");
+            let curDate = sDate;
             const countDateList = []
             while(curDate<=eDate){
                 countDateList.push(transDate(curDate));
@@ -478,6 +481,7 @@
             }
 
             for(let dateC in countDateList){
+                console.log(countDateList[dateC]);
                 getOutcargoReport(countDateList[dateC]);
             }
 

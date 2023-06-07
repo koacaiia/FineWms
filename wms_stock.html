@@ -157,7 +157,7 @@
             
             <div id="outcargotitle">
                 <div class="resultDiv">
-                        <input  type="date"  value="출고일" id="out_date"/>   
+                        <input  type="date"  value="출고일" id="out_date" />   
                         <script>
                             function transDate(dateT){
                                 let result_month = dateT.getMonth()+1;
@@ -182,7 +182,7 @@
                         <h4 >화주명</h4>
                     </div>
                     <div class="resultDiv">
-                        <input type="input" id = "out_consignee" class = "result_title_input" />
+                        <input type="input" id = "out_consignee" class = "result_title_input" onclick="consigneeOnclick();" />
                     
                     </div>    
                 </div>
@@ -323,7 +323,7 @@
                     <table class="outcargoResultBtr"id = "outcargo_results">
                         <thead>
                             <tr >
-                                <th>화주명</th>
+                                <th>요청시간</th>
                                 <th>출고일</th>
                                 <th>출고처</th>
                                 <th>출고요청수량(EA)</th>
@@ -524,6 +524,7 @@
                     let total_outcargo_qty=0;
                     for(var sC =0; sC<valueS.length;sC++){
                         const keyRef = Object.keys(snapshot.val())[sC];
+                        const keyRefSlice = keyRef.split("_")[0];
                         const valueI = valueS[sC]["Info"];
                         const refC = valueS[sC]["rePath"];
                         const infoConsignor = valueI["화주명"]
@@ -534,7 +535,7 @@
                         const infoPty = valueI["출고요청수량(PLT)"];
                         const infoAdmin = valueI["Admin"];
                         const infoProcess = valueI["Process"];
-                        const infoData =[infoConsignor,infoDate,infoDestination,infoQty,infoPty,infoRemark];
+                        const infoData =[keyRefSlice,infoDate,infoDestination,infoQty,infoPty,infoRemark];
                         console.log(infoConsignor+"/"+consignorName+"/"+infoDate+"/"+date)
                         if(infoDate == date && infoConsignor==consignorName){
                             
@@ -856,6 +857,10 @@
                     }                
                     }
                   }
+        function consigneeOnclick(){
+            const consignee = document.getElementById("out_consignee").value;
+            alert(consignee+" 화주명 변경시 출고요청 등록은 되나 "+consignee+" 에 대한 내역 확인에서는 제외 됩니다.변경시에는 비고란에 별도의 내용 작성 추천 합니다.!")
+        }          
         </script>
        
         

@@ -123,13 +123,14 @@
         }
         #date_picker1{
             margin-left:30%;
+            text-align:center;
         }
         #date_picker2{
             margin-left:10%;
+            text-align:center;
         }
         h6{
             text-align:center;
-            
         }
     </style>
 </head>
@@ -144,13 +145,13 @@
                     </script> -->
                 </div>
                 <div class="outcargoDateS">
-                    <input type="button" value="시작일" id="date_picker1" />
+                    <input type="date" value="시작일" id="date_picker1" />
                 </div>
                 <div class="outcargoDateS">
                     <h1>~</h1>
                 </div>
                 <div class="outcargoDateS">
-                    <input type="button" value="종료일" id="date_picker2" >
+                    <input type="date" value="종료일" id="date_picker2" >
                 </div>
                 <div class="outcargoDateS">
                     <input type="button" id="date_count" value="출고현황 검색" onclick="get_datecount()"/>
@@ -170,12 +171,12 @@
                     }
                     document.getElementById("date_picker1").value=transDate(new Date());
                     document.getElementById("date_picker2").value=transDate(new Date());
-                    $("#date_picker1").datepicker({
-                        language: 'ko'
-                    });
-                    $("#date_picker2").datepicker({
-                        language: 'ko'
-                    });
+                    // $("#date_picker1").datepicker({
+                    //     language: 'ko'
+                    // });
+                    // $("#date_picker2").datepicker({
+                    //     language: 'ko'
+                    // });
                 </script>
             </div>
         </div>
@@ -188,7 +189,7 @@
             </div>
             
             <div class="beforeTableContainer">
-                <table class="beforeTable">
+                <table id="beforeTable">
                     <thead>
                         <tr>
                             <th>화주명</th>
@@ -199,6 +200,9 @@
                             <th>출고요청사항</th>
                         </tr>
                     </thead>
+                    <tbody id="bTbody">
+
+                    </tbody>
                    
                 </table>
                 
@@ -211,7 +215,7 @@
                 <button id="btn_subreg" onclick="subReg();">선택자료<br> 출고증 출력</button>
             </div>
             <div class="afterTableContainer">
-                <table class="afterTable">
+                <table id="afterTable">
                     <thead>
                         <tr>
                             <th>화주명</th>
@@ -222,6 +226,7 @@
                             <th>출고요청사항</th>
                         </tr>
                     </thead>
+                    <tbody id="aTbody"></tbody>
                     
                 </table>
             </div>
@@ -244,18 +249,16 @@
             refValue.get().then((snapshot)=>{
                 snapValue = snapshot.val();
                 if(snapValue==null){
-                    alert(date+" 출고자료 없는것으로 확인 됩니다.");
+                    console.log(date+" 출고자료 없는것으로 확인 됩니다.");
                     return;
                 }
                 clientValue = Object.keys(snapValue);
-                let bTable = document.getElementsByClassName("beforeTable")[0];
-                let bTbody = document.createElement("tbody");
-                bTbody.setAttribute("class","bTbody");
+                let bTable = document.getElementById("beforeTable");
+                let bTbody = document.getElementById("bTbody");
                 bTable.appendChild(bTbody);
 
-                let aTable = document.getElementsByClassName("afterTable")[0];
-                let aTbody = document.createElement("tbody");
-                aTbody.setAttribute("class","aTbody");
+                let aTable = document.getElementById("afterTable");
+                let aTbody = document.getElementById("aTbody");
                 aTable.appendChild(aTbody);
                 for(let keyC=0;keyC<clientValue.length;keyC++){
                     var outcargoReportC = snapValue[clientValue[keyC]]["Content"];
@@ -270,6 +273,7 @@
                         rowTarget.classList.toggle("select");
                         let rowsIndex = rowTarget.rowIndex-1;
                         let targetTable = bTbody.getElementsByClassName("subTable")[rowsIndex];
+                        console.log(targetTable);
                         targetTable.classList.toggle("active");
                     })
                     let aTr = document.createElement("tr");
@@ -482,10 +486,10 @@
         
         
         function get_datecount(){
-            const tBodyEle= document.getElementById("outcargo_tbody");
-            if(tBodyEle != null){
-                tBodyEle.remove();
-            }
+            const tBodyB= document.getElementById("bTbody");
+            const tBodyA = document.getElementById("aTbody");
+            tBodyB.replaceChildren();
+            tBodyA.replaceChildren();
             sDate = new Date(document.getElementById("date_picker1").value);
             eDate = new Date(document.getElementById("date_picker2").value);
             var curDate = sDate;
@@ -496,9 +500,9 @@
             }
             const delParent = document.getElementsByClassName("beforeTable")[0];
             const delChild = document.getElementsByClassName("bTbody");
-            for(var delB=0 ; delChild.length;delB++){
-                delChild[delB].remove();
-            }
+            // for(var delB=0 ; delChild.length;delB++){
+            //     delChild[delB].remove();
+            // }
 
             for(let dateC in countDateList){
                 getOutcargoReport(countDateList[dateC]);

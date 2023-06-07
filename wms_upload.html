@@ -10,22 +10,104 @@
             border-collapse:collapse;
             border-spacing: 0;
             table-layout:fixed;
-            word-break:break-all;
+            word-break:normal;
+            word-wrap:break-word;
             border:1px solid #000;
             text-align:center;
+            width:97vw;
+            margin-top:3vh;
         }
-        th,td{
-            padding:10px 20px;
+        th{
+        height:5vh;
+        border:1px solid #000;
+        text-align:center;
+        font-size: calc(0.2vw + 0.2vh + 0.2vmin);
+        background:gray;
+        border:1px solid #000;
+        position: sticky;
+        top: 0;
+        }
+        td{
+            height:5vh;
             border:1px solid #000;
+            text-align:center;
+            font-size: calc(0.1vw + 0.1vh + 0.1vmin);
+            
         }
         table tbody tr:hover{
             background-color: lightgray;
             cursor:pointer;
         }
         .selected {
-            background-color: yellow;
+            background-color: rgb(150, 186, 241);
             color: black;
             font-weight: bold;
+        }
+        #clientDiv{
+            display:grid;
+            grid-template-rows:1fr 1fr;
+            text-align:center;
+        }
+        #file_info{
+            display:grid;
+            grid-gap:5px;
+            grid-template-columns:1fr 3fr;
+        }
+        #fileDiv{
+            display:grid;
+            grid-template-columns:1fr 1fr 2fr 1fr;
+            grid-gap:5px;
+        }
+        input[type="text"]{
+            text-align:center;
+        }
+        select{
+            width:100%;
+            height:100%;
+        }
+        #consignorDiv,#excelDiv,#fileDivIn,#clientDiv{
+            display:grid;
+            grid-template-rows:5vh 5vh;
+            text-align:center;
+            border:2px groove black;
+            border-radius:5px;
+        }
+        #rangeDiv,#clientDivIn{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+        }
+        #up_file{
+            display:none;
+        }
+        #fileDivIn label{
+            display: flex;
+            font-size: 0.83em;
+            font-weight: bold;
+            justify-content: center;
+            align-items: center;
+            background:rgb(209, 225, 242);
+        }
+        #titleDiv{
+            display:grid;
+            grid-template-columns:1.5fr 2fr;
+            width:calc(100vw*0.7)
+        }
+        #up_title{
+            text-align:center;
+        }
+        #btnDiv{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            width:60%;
+            margin-left:500px;
+        }
+        button{
+            margin:10px;
+            font-weight:bold;
+            border-radius:10px;
+        }
+        #tableDiv{
+            overflow-y:scroll;
         }
         
     </style>
@@ -35,13 +117,31 @@
     <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-storage.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script> 
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
+            authDomain: "finecargoinformation.firebaseapp.com",
+            databaseURL: "https://finecargoinformation-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "finecargoinformation",
+            storageBucket: "finecargoinformation.appspot.com",
+            messagingSenderId: "562937971880",
+            appId: "1:562937971880:web:98fb4152608485d72eae9d",
+            measurementId: "G-27CHK5X1W5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        let database_f = firebase.database(); 
+    </script>
 </head>
 <body>
         
         <div id="up_info">
-            <div>
+            <div id="titleDiv">
                 <h1 id="up_title"> today </h1>
+                <div id="btnDiv">
+                    <button id="btnDownLoad" onclick="down_load();">ExcelFile DownLoad</button>
+                    <button id="btnUpLoad" onclick="server_upload();">ExcelFile Server UpLoad</button>
+                </div>
                 <script>
                     const today = new Date();
                     let month = today.getMonth()+1;
@@ -54,23 +154,41 @@
                     };
 
                     const date = today.getFullYear()+"-"+month+"-"+day;
-                    var info =JSON.parse(localStorage.getItem("BasicData"))["info"];
+                    var info =JSON.parse(localStorage.getItem("BasicData"))["dept"];
                     document.getElementById("up_title").innerHTML = info+": "+date+"  재고 현황";
                         
                 </script>
             </div>
             <div id="file_info">
-                <div>
-                    <input type="file" id="up_file" onchange="upload(event);">
+                <div id="clientDiv">
+                    <h5>거래처 명(거래명세서 발급처)</h5>
+                    <div id="clientDivIn">
+                        <select title="clientName" id="clientSel">
+                            <option value="거래처 선택"> 거래처 선택</option>
+                        </select>
+                    <input type="text" id="clientInput" value="거래처명 입력" onFocus="this.value='';return true;"/>
+                    </div>
+                    
+                </div>
+                <div id="fileDiv">
+                    <div id="fileDivIn">
+                        <label for="up_file">파일찾기</label>
+                        <input type="file" id="up_file" onchange="upload(event);">
+                        <input type="text" value="첨부 파일" id="attachedFileName"/>
+                    </div>
+                    
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
                     <script>
-                        var sheet_names = [];
-                        var sheet_count = 0;
-                        var excel_data = null;
-                        var workbook = null;
+                        
+                        let sheet_count = 0;
+                        let excel_data = null;
+                        let workbook = null;
                         function upload(event){
-                            var file = event.target.files[0];
-                            var reader = new FileReader();
+                            let select_s = document.getElementById("up_sheetName");
+                            select_s.replaceChildren();
+                            let sheet_names = [];
+                            let file = event.target.files[0];
+                            let reader = new FileReader();
                             reader.onload = function(event){
                                 var data = event.target.result;
                                 excel_data= event.target.result;
@@ -79,143 +197,37 @@
                                 sheet_count = sheetNames.length;
                                 for(var i=0;i<sheet_count;i++){
                                     sheet_names.push(workbook.SheetNames[i]);
-                                    var sheetName_s =document.createElement("option");
+                                    const sheetName_s =document.createElement("option");
                                     sheetName_s.text=workbook.SheetNames[i];
-                                    var select_s = document.getElementById("up_sheetName");
+                                    select_s = document.getElementById("up_sheetName");
                                     select_s.add(sheetName_s);
                                 }
                                 /*var sheet = workbook.Sheets[sheetName];*/
                             };
                             reader.readAsBinaryString(file);
-    
+                            const fileInput = document.getElementById("up_file").files[0].name;
+                            document.getElementById("attachedFileName").value= fileInput;
+
                         }
                     </script>
-                    <div>
+                    <div id="consignorDiv">
+                        <h5>실화주명</h5>
                         <select title="sheet_name" id="up_sheetName">
-                            <script>
-                                
-
-                            </script>
                         </select>
                     </div>
-                    <div>
-                        <input id="range_s" type="text" value="B4" onFocus="this.value='';return true;" />
-                        <input id="range_e" type="text" value="AB150" onFocus="this.value='';return true;"/>
+                    <div id="excelDiv">
+                        <h5>엑셀 데이터 범위</h5>
+                        <div id="rangeDiv">
+                            <input id="range_s" type="text" value="B4" onFocus="this.value='';return true;" />
+                            <input id="range_e" type="text" value="AB150" onFocus="this.value='';return true;"/>
+                        </div>
+                        
                     </div>
-                    <div>
-                        <input type="button" value="DATA  DOWNLOAD" onclick="down_load();"/>
-                        <script>
-                            var rowsValue = null;
-                            var op_s = null;
-                            function down_load(){
-                                let target = document.getElementById("up_sheetName");
-                                let up_tbody = document.createElement("tbody");
-                                let up_table = document.getElementById("up_table");
-                                let up_thead = document.getElementById("up_thead");
-                                up_table.appendChild(up_thead);
-                                up_table.appendChild(up_tbody);
-                                op_s = target.options[target.selectedIndex].text;
-                                const rangeS = document.getElementById("range_s").value.toUpperCase();
-                                const rangeE = document.getElementById("range_e").value.toUpperCase();
-                                const ran =rangeS+":"+rangeE;
-                                let info_value=new Array();
-                                var options = {
-                                    defval:"",
-                                    range:ran,
-                                    blankrows:false,
-                                    raw:false };
-                                rowsValue = XLSX.utils.sheet_to_json(workbook.Sheets[op_s],options);
-                                for(var rC =0; rC<rowsValue.length;rC++){
-                                    var headerValue = Object.keys(rowsValue[rC]);
-                                    var stockValue = Object.values(rowsValue[rC]);
-                                    var row_value = document.createElement("tr"); 
-                                    if(rC==0){                                        
-                                        const up_tr = document.getElementById("up_tr");                                        
-                                        for(var hC=0;hC<headerValue.length;hC++){
-                                            const up_th = document.createElement("th");
-                                            up_th.innerHTML=headerValue[hC];
-                                            up_tr.appendChild(up_th);
-                                        }                                        
-                                        up_thead.appendChild(up_tr);
-                                       }
-                                    for(var sC=0;sC<stockValue.length;sC++){
-                                        var ex_value = document.createElement("td");
-                                        ex_value.innerHTML=stockValue[sC];
-                                        row_value.appendChild(ex_value);
-                                    }
-                                    up_tbody.appendChild(row_value);
-                                }                               
-                            }
-                            function server_upload(){
-                                let selected_arr = new Array();
-                                let confirm_message = "";
-                                const selectedRow = document.querySelectorAll("tr.selected");
-                                const up_tbody = document.querySelector("tbody");
-                                const up_trCount = up_tbody.childElementCount;
-                                for(var rVc=0;rVc<rowsValue.length;rVc++){
-                                    const tr_check = up_tbody.children[rVc];
-                                    const check_value = tr_check.classList;
-                                    if(check_value == "selected"){
-                                        const value = rowsValue[rVc];
-                                        console.log(value,typeof value);
-                                        selected_arr.push(value);
-                                        confirm_message = confirm_message+"\n"+ value["반입일"]+":"+value["BL"]+":"+value["품목"]+":"+value["반입수량(EA)"]+"(EA)";
-                                    }
-                                }
-                                const server_upload_confirm = confirm(confirm_message+"\n"+"하기내용 서버 업로드 하시겠습니까?");
-                                if(server_upload_confirm){
-                                    const firebaseConfig = {
-                                        apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
-                                        authDomain: "finecargoinformation.firebaseapp.com",
-                                        databaseURL: "https://finecargoinformation-default-rtdb.asia-southeast1.firebasedatabase.app",
-                                        projectId: "finecargoinformation",
-                                        storageBucket: "finecargoinformation.appspot.com",
-                                        messagingSenderId: "562937971880",
-                                        appId: "1:562937971880:web:98fb4152608485d72eae9d",
-                                        measurementId: "G-27CHK5X1W5"
-                                    };
-                                    firebase.initializeApp(firebaseConfig);
-                                    
-                                    var database_f = firebase.database();
-                                    for(var fC=0;fC<selected_arr.length;fC++){
-                                        const stock_info = selected_arr[fC];
-                                        const date = stock_info["반입일"];
-                                        const bl = stock_info["BL"];
-                                        const des = stock_info["품목"];
-                                        const qty = stock_info["반입수량(EA)"];
-                                        const ref_value = date+"_"+bl+"_"+des+"_"+qty
-
-                                        if(op_s == "케이비켐㈜"){
-                                            op_s = "케이비씨엔에어/"+op_s;
-                                        }
-                                        if(op_s== "SPCGFS"){
-                                            op_s = "시노관세사/"+op_s;
-                                        }
-                                        let deptNames= "fine2";
-                                        database_f.ref("DeptName/"+deptNames+"/ConsignorValue/"+op_s+"/StockReport/"+ref_value+"/").update(selected_arr[fC])
-                                        .then(() => {
-                                            console.log("Object uploaded successfully!");
-                                        })
-                                        .catch((error) => {
-                                            console.error("Error uploading object: ", error);
-                                        });
-                                    }
-                                }else{
-                                    alert("서버 전송취소 합니다.");
-                                }
-                            }
-                        </script>
-                    </div>
-                    <div>
-                        <input type="button" value="SERVER UPLOAD" onclick="server_upload();"/>
-                        <script>
-
-                        </script>    
-                    </div>
+                    
                 </div>
                 
             </div>
-            <div>
+            <div id="tableDiv">
                 <table id ="up_table">
                     <script>
                         const table = document.getElementById("up_table");
@@ -249,15 +261,97 @@
                             
                         </tr>
                     </thead>
-
                 </table>
             </div>
-            
-
         </div>
-        
+        <script>
+            let rowsValue = null;
+            let op_s = null;
+            function down_load(){
+                let target = document.getElementById("up_sheetName");
+                let up_tbody = document.createElement("tbody");
+                let up_table = document.getElementById("up_table");
+                let up_thead = document.getElementById("up_thead");
+                up_table.appendChild(up_thead);
+                up_table.appendChild(up_tbody);
+                op_s = target.options[target.selectedIndex].text;
+                const rangeS = document.getElementById("range_s").value.toUpperCase();
+                const rangeE = document.getElementById("range_e").value.toUpperCase();
+                const ran =rangeS+":"+rangeE;
+                let info_value=new Array();
+                var options = {
+                    defval:"",
+                    range:ran,
+                    blankrows:false,
+                    raw:false };
+                rowsValue = XLSX.utils.sheet_to_json(workbook.Sheets[op_s],options);
+                for(var rC =0; rC<rowsValue.length;rC++){
+                    var headerValue = Object.keys(rowsValue[rC]);
+                    var stockValue = Object.values(rowsValue[rC]);
+                    var row_value = document.createElement("tr"); 
+                    if(rC==0){                                        
+                        const up_tr = document.getElementById("up_tr");                                        
+                        for(var hC=0;hC<headerValue.length;hC++){
+                            const up_th = document.createElement("th");
+                            up_th.innerHTML=headerValue[hC];
+                            up_tr.appendChild(up_th);
+                        }                                        
+                        up_thead.appendChild(up_tr);
+                        }
+                    for(var sC=0;sC<stockValue.length;sC++){
+                        var ex_value = document.createElement("td");
+                        ex_value.innerHTML=stockValue[sC];
+                        row_value.appendChild(ex_value);
+                    }
+                    up_tbody.appendChild(row_value);
+                }                               
+                }
+            function server_upload(){
+                let selected_arr = new Array();
+                let confirm_message = "";
+                const selectedRow = document.querySelectorAll("tr.selected");
+                const up_tbody = document.querySelector("tbody");
+                const up_trCount = up_tbody.childElementCount;
+                for(var rVc=0;rVc<rowsValue.length;rVc++){
+                    const tr_check = up_tbody.children[rVc];
+                    const check_value = tr_check.classList;
+                    if(check_value == "selected"){
+                        const value = rowsValue[rVc];
+                        console.log(value,typeof value);
+                        selected_arr.push(value);
+                        confirm_message = confirm_message+"\n"+ value["반입일"]+":"+value["BL"]+":"+value["품목"]+":"+value["반입수량(EA)"]+"(EA)";
+                    }
+                }
+                const server_upload_confirm = confirm(confirm_message+"\n"+"하기내용 서버 업로드 하시겠습니까?");
+                if(server_upload_confirm){
+                    
+                    for(var fC=0;fC<selected_arr.length;fC++){
+                        const stock_info = selected_arr[fC];
+                        const date = stock_info["반입일"];
+                        const bl = stock_info["BL"];
+                        const des = stock_info["품목"];
+                        const qty = stock_info["반입수량(EA)"];
+                        const ref_value = date+"_"+bl+"_"+des+"_"+qty
 
-    
-    
+                        if(op_s == "케이비켐㈜"){
+                            op_s = "케이비씨엔에어/"+op_s;
+                        }
+                        if(op_s== "SPCGFS"){
+                            op_s = "시노관세사/"+op_s;
+                        }
+                        let deptNames= "fine2";
+                        database_f.ref("DeptName/"+deptNames+"/ConsignorValue/"+op_s+"/StockReport/"+ref_value+"/").update(selected_arr[fC])
+                        .then(() => {
+                            console.log("Object uploaded successfully!");
+                        })
+                        .catch((error) => {
+                            console.error("Error uploading object: ", error);
+                        });
+                    }
+                }else{
+                    alert("서버 전송취소 합니다.");
+                }
+            }
+        </script>        
 </body>
 </html>
