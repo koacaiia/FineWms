@@ -154,7 +154,7 @@
                     };
 
                     const date = today.getFullYear()+"-"+month+"-"+day;
-                    var info =JSON.parse(localStorage.getItem("BasicData"))["dept"];
+                    let info =JSON.parse(localStorage.getItem("BasicData"))["dept"];
                     document.getElementById("up_title").innerHTML = info+": "+date+"  재고 현황";
                         
                 </script>
@@ -265,6 +265,21 @@
             </div>
         </div>
         <script>
+            const dataRef = database_f.ref("DeptName/"+info+"/ConsignorValue");
+            dataRef.get().then((snapshot=>{
+                if(snapshot.val()==null){
+                    console.log("DataBase Snapshot Value Null");
+                    return;
+                }
+                const keyValue = Object.keys(snapshot.val());
+                const selEle = document.getElementById("clientSel");
+                for(keyC in keyValue){  
+                    const opEle = document.createElement("option");
+                    opEle.value= keyValue[keyC];
+                    opEle.text = keyValue[keyC];
+                    selEle.appendChild(opEle);
+                }
+            }));
             let rowsValue = null;
             let op_s = null;
             function down_load(){
@@ -307,22 +322,28 @@
                 }                               
                 }
             function server_upload(){
+                const client = document.getElementById("clientInput").value;
+                const consignor = document.getElementById("up_sheetName").value;
+                const confirmMsg ="화인담당부서: "+info+"\n거래처명: "+client+"\n화주명: "+consignor;
+                // const upLoadConfirm = confirm(confirmMsg);
+                // return;
                 let selected_arr = new Array();
                 let confirm_message = "";
                 const selectedRow = document.querySelectorAll("tr.selected");
                 const up_tbody = document.querySelector("tbody");
                 const up_trCount = up_tbody.childElementCount;
+                let selectCount=0;
                 for(var rVc=0;rVc<rowsValue.length;rVc++){
                     const tr_check = up_tbody.children[rVc];
                     const check_value = tr_check.classList;
                     if(check_value == "selected"){
                         const value = rowsValue[rVc];
-                        console.log(value,typeof value);
                         selected_arr.push(value);
-                        confirm_message = confirm_message+"\n"+ value["반입일"]+":"+value["BL"]+":"+value["품목"]+":"+value["반입수량(EA)"]+"(EA)";
+                        selectCount=selectCount+1;
+                        confirm_message = confirm_message+"\n"+ value["반입일"]+" : "+value["BL"]+" : "+value["품목"]+" : "+value["반입수량(EA)"]+"(EA)";
                     }
                 }
-                const server_upload_confirm = confirm(confirm_message+"\n"+"하기내용 서버 업로드 하시겠습니까?");
+                const server_upload_confirm = confirm(confirmMsg+"\n"+confirm_message+"\n"+selectCount+"(건)으로 서버 업로드 하시겠습니까?");
                 if(server_upload_confirm){
                     
                     for(var fC=0;fC<selected_arr.length;fC++){
@@ -332,15 +353,7 @@
                         const des = stock_info["품목"];
                         const qty = stock_info["반입수량(EA)"];
                         const ref_value = date+"_"+bl+"_"+des+"_"+qty
-
-                        if(op_s == "케이비켐㈜"){
-                            op_s = "케이비씨엔에어/"+op_s;
-                        }
-                        if(op_s== "SPCGFS"){
-                            op_s = "시노관세사/"+op_s;
-                        }
-                        let deptNames= "fine2";
-                        database_f.ref("DeptName/"+deptNames+"/ConsignorValue/"+op_s+"/StockReport/"+ref_value+"/").update(selected_arr[fC])
+                        database_f.ref("DeptName/"+info+"/ConsignorValue/"+client+"/"+consignor+"/StockReport/"+ref_value+"/").update(selected_arr[fC])
                         .then(() => {
                             console.log("Object uploaded successfully!");
                         })
