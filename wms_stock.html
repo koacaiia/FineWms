@@ -650,7 +650,7 @@
                 
             }
             function btn_excelwrite(){
-                    const fileName = dept+"_"+date+"_"+clientName+" 재고목록.xlsx";
+                    const fileName = deptName+"_"+date+"_"+clientName+" 재고목록.xlsx";
                     const wb = XLSX.utils.table_to_book(document.getElementById('table_data'), {sheet:"test",raw:true});
                     XLSX.writeFile(wb, (fileName));
                   } 
