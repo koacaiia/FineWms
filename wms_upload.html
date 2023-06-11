@@ -85,7 +85,7 @@
             font-weight: bold;
             justify-content: center;
             align-items: center;
-            background:rgb(209, 225, 242);
+            background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
         }
         #titleDiv{
             display:grid;
@@ -99,12 +99,13 @@
             display:grid;
             grid-template-columns:1fr 1fr;
             width:60%;
-            margin-left:500px;
+            margin-left:40%;
         }
         button{
             margin:10px;
             font-weight:bold;
             border-radius:10px;
+            background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
         }
         #tableDiv{
             overflow-y:scroll;
@@ -163,10 +164,16 @@
                 <div id="clientDiv">
                     <h5>거래처 명(거래명세서 발급처)</h5>
                     <div id="clientDivIn">
-                        <select title="clientName" id="clientSel">
+                        <select title="clientName" id="clientSel" onchange="selectClient();">
                             <option value="거래처 선택"> 거래처 선택</option>
                         </select>
                     <input type="text" id="clientInput" value="거래처명 입력" onFocus="this.value='';return true;"/>
+                    <script>
+                        function selectClient(){
+                            const clientName = document.getElementById("clientSel").value;
+                            document.getElementById("clientInput").value= clientName;
+                        };
+                    </script>    
                     </div>
                     
                 </div>

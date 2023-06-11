@@ -124,14 +124,24 @@
         #date_picker1{
             margin-left:30%;
             text-align:center;
+            border-radius:10px;
         }
         #date_picker2{
             margin-left:10%;
             text-align:center;
+            border-radius:10px;
         }
         h6{
             text-align:center;
         }
+        button{
+            border-radius:10px;
+            background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
+        }
+        #date_count{
+            height:80%;
+        }
+       
     </style>
 </head>
 <body>
@@ -154,7 +164,7 @@
                     <input type="date" value="종료일" id="date_picker2" >
                 </div>
                 <div class="outcargoDateS">
-                    <input type="button" id="date_count" value="출고현황 검색" onclick="get_datecount()"/>
+                    <button id="date_count" onclick="get_datecount()">출고현황 검색</button>
                 </div>
                 <script>
                     function transDate(dateT){

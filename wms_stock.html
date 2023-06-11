@@ -508,8 +508,6 @@
             function getOutcargoResult(date){
                 const refString="DeptName/"+deptName+"/OutCargoReport/"+date+"/";
                 const refData=database_f.ref(refString);
-                console.log(date)
-                
                 refData.get().then((snapshot)=>{
                     if(snapshot.val()===null){
                         //alert(date+" 기간내 출고등록 건수 없습니다.");
@@ -642,12 +640,11 @@
                 })*/
             };
             function outcargo_attachmentDel(){
-                fileNames=[];
-                const fileEle=document.getElementById("file_names");
-                fileEle.innerHTML="File Names";
-                document.getElementById("out_attachment").value="";
-               
-                
+                // fileNames=[];
+                // const fileEle=document.getElementById("file_names");
+                // fileEle.innerHTML="File Names";
+                // document.getElementById("out_attachment").value="";
+                sendMessage();
             }
             function btn_excelwrite(){
                     const fileName = deptName+"_"+date+"_"+clientName+" 재고목록.xlsx";

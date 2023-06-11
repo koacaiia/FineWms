@@ -221,18 +221,21 @@
             
         }
         function btn_administrator_outcargoU(){
-            window.location.href="wms_reg.html";
+            // window.location.href="wms_reg.html";
+            window.open("wms_reg.html");
         }function btn_administrator_stock(){
             const deptValue = document.getElementById("sel_dept").value;
             const dataInfo ={"dept":deptValue};
             localStorage.setItem("BasicData",JSON.stringify(dataInfo));
-            window.location.href="wms_upload.html";
+            // window.location.href="wms_upload.html";
+            window.open("wms_upload.html");
         }
         function btn_administrator_outcargoD(){
             const deptValue = document.getElementById("sel_dept").value;
             const dataInfo ={"dept":deptValue};
             localStorage.setItem("BasicData",JSON.stringify(dataInfo));
-            window.location.href="wms_outcargoReport.html";
+            // window.location.href="wms_outcargoReport.html";
+            window.open("wms_outcargoReport.html");
         }
        
         function btn_logA(){
