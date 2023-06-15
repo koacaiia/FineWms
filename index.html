@@ -94,6 +94,15 @@
             font-weight:bolder;
             background: linear-gradient(to top, black,5%, rgb(238, 241, 244));
         }
+        #stock_update{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            width:60%;
+            margin:0 auto;
+        }
+        #stock_update .adBtn{
+            width:95%;
+        }
         
         
     </style>
@@ -151,9 +160,6 @@
             <button id="btn_regC" value="Confirm" onclick="reg(this)">신규등록</button>
 
         </div>
-        
-       
-        
     </div>
     <div class ="ad">
         <div class="entry">
@@ -169,17 +175,17 @@
             <button id="adBtn" value="Confirm" onclick="btn_logA()">관리자 Log In</button>
             <button id="btn_regA" value="Confirm" onclick="reg(this)">신규등록</button>
         </div>
-            <input id="stock_reg" class="adBtn" type="button" value="출고자료 등록,수정" onclick="btn_administrator_outcargoU()">  
-            <input class="adBtn" type="button" value="재고목록 신규등록,수정" onclick="btn_administrator_stock()">
+            <input id="stock_reg" class="adBtn" type="button" value="출고자료 등록,수정" onclick="btn_administrator_outcargoU()"> 
+            <div id="stock_update">
+                <input class="adBtn" type="button" value="재고목록 신규등록" onclick="btn_administrator_stock()">
+                <input class="adBtn" type="button" value="재고목록 수정" onclick="btn_administrator_stockU()">
+            </div> 
             <input class="adBtn" type="button" value="출고자료 현황 조회(정산)" onclick="btn_administrator_outcargoD()">
-            
         
-       
     </div>
     <div id="logo">
 
     </div>
-    
     <script>
         const actionCodeSettings = {
             // URL you want to redirect back to. The domain (www.example.com) for this
@@ -223,21 +229,28 @@
         function btn_administrator_outcargoU(){
             // window.location.href="wms_reg.html";
             window.open("wms_reg.html");
-        }function btn_administrator_stock(){
+        };
+        function btn_administrator_stock(){
             const deptValue = document.getElementById("sel_dept").value;
             const dataInfo ={"dept":deptValue};
             localStorage.setItem("BasicData",JSON.stringify(dataInfo));
             // window.location.href="wms_upload.html";
             window.open("wms_upload.html");
-        }
+        };
+        function btn_administrator_stockU(){
+            const deptValue = document.getElementById("sel_dept").value;
+            const dataInfo ={"dept":deptValue};
+            localStorage.setItem("BasicData",JSON.stringify(dataInfo));
+            // window.location.href="wms_upload.html";
+            window.open("wms_stockU.html");
+        };
         function btn_administrator_outcargoD(){
             const deptValue = document.getElementById("sel_dept").value;
             const dataInfo ={"dept":deptValue};
             localStorage.setItem("BasicData",JSON.stringify(dataInfo));
             // window.location.href="wms_outcargoReport.html";
             window.open("wms_outcargoReport.html");
-        }
-       
+        };
         function btn_logA(){
             const acc = document.getElementById("adId").value;
             const deptValue = document.getElementById("sel_dept").value;
@@ -247,7 +260,7 @@
                 if(accKey.includes(acc)){
                     const pwIn = Object.values(event.val()[acc])[0];
                     if(pw===pwIn){
-                        for(i=0;i<3;i++){
+                        for(i=0;i<4;i++){
                             document.getElementsByClassName("adBtn")[i].classList.toggle("active");
                         // document.getElementsByClassName("adBtn")[1].classList.toggld("active");
                         // document.getElementsByClassName("adBtn")[2].classList.toggle("active");

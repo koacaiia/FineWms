@@ -43,12 +43,16 @@
         
     </script>
     
-    <div class ="tableMain">
+    <div class ="tableMainU">
     <div id="table">
         <div id="info">
                 <div id="infoTitle">
                     <h6  id="depot_s"></h6>
-                    <h6  id="title"></h6>
+                    <div id="titleUDiv">
+                        <select  id="titleU">
+                        </select>
+                    </div>
+                    
                     <div id="consignorDiv">
                         <select title="화주명"  id="consignor"></select>
                     </div>
@@ -63,42 +67,41 @@
                         if(day <10){
                             day = "0"+day
                         }
-                        let date =today.getFullYear()+"-"+month+"-"+day;
-                        let title = document.getElementById('title');
-                        let clientName =  JSON.parse(localStorage.getItem("BasicData"))["client"];
-                        title.innerText = clientName;
-                        let deptName = JSON.parse(localStorage.getItem("BasicData"))["dept"];
-                        let consignorData= JSON.parse(localStorage.getItem("BasicData"))["consignor"];
+                        const date =today.getFullYear()+"-"+month+"-"+day;
+                        const title = document.getElementById('titleU');
+                        const deptName = JSON.parse(localStorage.getItem("BasicData"))["dept"];
+                        const consignorData= JSON.parse(localStorage.getItem("BasicData"))["consignor"];
                         document.getElementById("depot_s").innerHTML=deptName;
                         document.getElementById("date").innerHTML=date;
                         const consigSel = document.getElementById("consignor");
-                        database_f.ref("DeptName/"+deptName+"/ConsignorValue/"+clientName).get().then((snapshot)=>{
-                            console.log(snapshot.val());
-                            let obConsignor;
-                            if(snapshot.val()==null){
-                                obConsignor = ["케이비켐(주)"]
-                            }else{
-                                obConsignor = Object.keys(snapshot.val());
-                            }
-                            if(obConsignor.length==1){
-                                const op = document.createElement("option");
-                                op.value=obConsignor[0];
-                                op.text = obConsignor[0];
-                                consigSel.appendChild(op);
-                                getOutcargoData(obConsignor[0]);
-                                document.getElementById("out_consignee").value=obConsignor[0];                                
-                            }else{
-                                const op = document.createElement("option");
-                                op.value = "화주선택"
-                                op.text ="화주선택";
-                                consigSel.appendChild(op);
+                        database_f.ref("DeptName/"+deptName+"/ConsignorValue/").get().then((snapshot)=>{
+                            const obConsignor = Object.keys(snapshot.val());
+                            console.log(obConsignor);
+                            const op = document.createElement("option");
+                            op.value = "거래처 선택"
+                            op.text ="거래처 선택";
+                            title.appendChild(op);
                                 for(let cC in obConsignor){
                                 const op = document.createElement("option");
                                 op.value=obConsignor[cC];
                                 op.text = obConsignor[cC];
+                                title.appendChild(op);
+                                }
+                            title.addEventListener("change",(event)=>{
+                            consigSel.replaceChildren();    
+                            const clientValue = event.target.value;
+                            const consigList = Object.keys(snapshot.val()[clientValue]);
+                            const op = document.createElement("option");
+                            op.value = "화주 선택"
+                            op.text ="화주 선택";
+                            consigSel.appendChild(op);
+                            for(let cC in consigList){
+                                const op = document.createElement("option");
+                                op.value=consigList[cC];
+                                op.text =consigList[cC];
                                 consigSel.appendChild(op);
                             }
-                            }
+                        });
                         });
                         consigSel.addEventListener("change",(event)=>{
                             const tableEle = document.getElementById("table_container");
@@ -248,116 +251,6 @@
            
         </div>
         </div>
-        <div class="stockMain">
-                <div class="outcargoResultTitle">
-                    
-                    <div class="outcargoDate">
-                        <div class="outcargoDateS">
-                            <input type="date" value="시작일" id="date_picker1" />
-                        </div>
-                        
-                        <div class="outcargoDateS">
-                            <input type="date" value="종료일" id="date_picker2" >
-                        </div>
-                        <div class="outcargoDateS">
-                            <input type="button" id="date_count" value="출고현황 검색" onclick="get_datecount()"/>
-                        </div>
-                        <div class="data_delD">
-                            <button id="data_del" onclick="outdataDel();">선택항목 삭제
-
-                            </button>                        
-                        </div>
-                        <div class="data_delD">
-                            <button id="data_trans" onclick="outdataTrans();">세부내역 탭
-
-                            </button>                        
-                        </div>
-                        <script>
-                            document.getElementById("date_picker1").value=transDate(new Date());
-                            document.getElementById("date_picker2").value=transDate(new Date());
-                            // $("#date_picker1").datepicker({
-                            //     language: 'ko'
-                            // });
-                            // $("#date_picker2").datepicker({
-                            //     language: 'ko'
-                            // });
-                            function get_datecount(){
-                                total_outcargo_count=0;
-                                total_outcargo_qty=0;
-                                total_outcargo_pty=0;
-                                const tBodyEle= document.getElementById("outcargo_tbody");
-                                if(tBodyEle != null){
-                                    tBodyEle.remove();
-                                }
-                                const tBodyCreate = document.createElement("tbody");
-                                tBodyCreate.id="outcargo_tbody";
-                                document.getElementById("outcargo_results").appendChild(tBodyCreate);
-                                sDate = new Date(document.getElementById("date_picker1").value);
-                                eDate = new Date(document.getElementById("date_picker2").value);
-                                var curDate = sDate;
-                                const countDateList = []
-                                while(curDate<=eDate){
-                                    countDateList.push(transDate(curDate));
-                                    curDate.setDate(curDate.getDate() +1)
-                                }
-                                for(let dateC in countDateList){
-                                    getOutcargoResult(countDateList[dateC]);
-                                }
-
-                            }
-                        </script>    
-                    </div>
-                    <div class="infoResult">
-                        <h6 id="outcargo_case">총출고 건수:</h6><h6 id="outcargo_qty">총출고 수량:</h6><h6 id="outcargo_pty">총출고 팔렛트 수량:</h6>
-                    </div>
-                     
-                </div>
-                <div class="outcargoResult">
-                    <table class="outcargoResultBtr"id = "outcargo_results">
-                        <thead>
-                            <tr >
-                                <th>요청시간</th>
-                                <th>출고일</th>
-                                <th>출고처</th>
-                                <th>출고요청수량(EA)</th>
-                                <th>출고요청수량(PLT)</th>
-                                <th>출고요청사항</th> 
-                                <th>첨부파일</th>                               
-                            </tr>
-                        </thead>
-                        <tbody id="outcargo_tbody">
-
-                        </tbody>
-                    </table>
-                </div>
-            
-        </div>
-    </div>
-    <div id="popup" class="popup">
-        <h2 id="popTitle">Open Pop Up Window</h2>
-        <div id="popUpRemark">
-            <input id="popUpRemarkEdit"/>
-            <button id="popUpRemarkBtn" onclick="popRemarkBtn();">비고사항 등록</button>
-        </div>
-        <div id="picRemark">
-            <h5>화물특이사항 관련사진</h5>
-            <table id="picRemarkTable">
-                <tr id="picReamrkTd"></tr>
-            </table>
-        </div>
-        <div id="picRelease">
-            <h5>화물출고사항 관련사진</h5>
-            <table id="picReleaseTable">
-                <tr id="picReleaseTd"></tr>
-            </table>
-        </div>
-        <div>
-            <button id ="popUpSub" onclick="submitPopUp();">출고등록</button>
-            <button id ="popPicUp" onclick="picUp()">사진업로드</button>
-            <button id ="popPicDown" onclick="picDown()">사진저장</button> 
-            <button onclick="closePopup();">창닫기</button>
-        </div>
-    </div>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
         <script >
             /*alert(clientName+" 에서 관리하는 화주가 "+  consignorData + "  로 확인 됩니다."+"\n화주 확인후 업무 진행 바랍니다.!")*/
@@ -381,6 +274,7 @@
             document.getElementById('result1').appendChild(result_table);
             let clicked_info = [];
             let clicked_item = new Array();
+            const clientName = document.getElementById("titleU").value;
             const refValue = database_f.ref("DeptName/"+
             deptName+"/ConsignorValue/"+clientName+"/"+consignorData+"/StockReport/");
             var ref_arr = new Array();
@@ -400,6 +294,7 @@
              
                 for(var refC =0;refC<value.length;refC++){
                     const body_tr= document.createElement('tr');
+                    const body_trH= document.createElement("tr");
                     let total_ea;
                     let total_plt;
                     if( typeof value[refC]["총재고수량(EA)"]=="string"){
@@ -417,22 +312,35 @@
                     for(var titleC =0;titleC<head_title.length;titleC++){
                         const title_set = value[refC][head_title[titleC]];
                         const body_td = document.createElement("td");
-                        body_td.innerHTML = title_set;
+                        const body_tdH= document.createElement("td");
+                        if(titleC>3){
+                            const body_input = document.createElement("input");
+                            body_input.setAttribute("class","inputUpdate");
+                            body_input.value=title_set;
+                            body_input.style.width="100%";
+                            body_input.style.height="100%";
+                            if(titleC==12){
+                                body_tdH.style.width="20vw";
+                            }
+                            body_tdH.appendChild(body_input);
+                        }else{
+                            body_tdH.innerHTML=title_set;
+                        }
+                        body_td.innerHTML=title_set;
                         body_tr.appendChild(body_td);
+                        body_trH.appendChild(body_tdH);
                     }
-                    tbody.appendChild(body_tr);    
+                    tbody.appendChild(body_tr);
+                    tbody.appendChild(body_trH);    
                 };
                 document.getElementById("stock_case").innerHTML = "총재고 건수: "+value.length+" 건";
                 document.getElementById("stock_total_qty").innerHTML ="총재고 수량: "+ totalQty+" EA";
                 document.getElementById("stock_total_pty").innerHTML ="총 재고 팔렛트 수량: "+totalPty+" PLT";
                                
             });
-            getOutcargoResult(date);
             }
-            
 
             function outcargo_submit(){
-                
                 const now =new Date();
                 const reg_time = now.getHours()+"시"+now.getMinutes()+"분"+now.getSeconds()+"초";
                 const date = document.getElementById("out_date").value;
@@ -521,120 +429,8 @@
                 outcargo_attachmentDel();
                 getOutcargoResult(date); 
                 };
-            getOutcargoResult(date);    
                 
-            function getOutcargoResult(date){
-                console.log("getOurcargoResult init");
-                const refString="DeptName/"+deptName+"/OutCargoReport/"+date+"/";
-                const refData=database_f.ref(refString);
-                refData.get().then((snapshot)=>{
-                    if(snapshot.val()===null){
-                        //alert(date+" 기간내 출고등록 건수 없습니다.");
-                        return;
-                    }
-                    const consignorName = document.getElementById("consignor").value;
-                    const valueS = Object.values(snapshot.val());
-                    const info_table = document.getElementById("outcargo_results");
-                    const info_tbody = document.getElementById("outcargo_tbody");
-                    let total_outcargo_count=0;
-                    let total_outcargo_pty=0;
-                    let total_outcargo_qty=0;
-                    for(var sC =0; sC<valueS.length;sC++){
-                        const keyRef = Object.keys(snapshot.val())[sC];
-                        const keyRefSlice = keyRef.split("_")[0];
-                        const valueI = valueS[sC]["Info"];
-                        const refC = valueS[sC]["rePath"];
-                        const infoConsignor = valueI["화주명"]
-                        const infoDate = valueI["출고일"];
-                        const infoRemark = valueI["출고요청사항"];
-                        const infoQty = valueI["출고요청수량(EA)"];
-                        const infoDestination = valueI["출고처"];
-                        const infoPty = valueI["출고요청수량(PLT)"];
-                        const infoAdmin = valueI["Admin"];
-                        const infoProcess = valueI["Process"];
-                        const infoData =[keyRefSlice,infoDate,infoDestination,infoQty,infoPty,infoRemark];
-                        console.log(infoConsignor+"/"+consignorName+"/"+infoDate+"/"+date)
-                        if(infoDate == date && infoConsignor==consignorName){
-                            
-                            total_outcargo_qty=parseInt(total_outcargo_qty+parseInt(infoQty));
-                            total_outcargo_pty=parseInt(total_outcargo_pty+parseInt(infoPty));                            
-                            const info_row = document.createElement("tr");
-                            if(infoProcess =="Completion"){
-                                info_row.style.background="#FF9999";
-                            } 
-                            const valueC = Object.values(valueS[sC]["Content"]);
-                            const sub_thL =["반입일","품명","BL","출고요청수량(EA)","출고요청수량(PLT)","출고요청사항"];                                
-                            const sub_htr = document.createElement("tr");
-                            for(iC =0; iC<infoData.length; iC++){
-                                const info_td = document.createElement("td");
-                                //info_td.appendChild(info_row);                               
-                                info_td.innerHTML= infoData[iC];
-                                info_row.appendChild(info_td);
-                            }
-                            const attachRef =firebase.storage().ref(refString+keyRef+"/Attachment/");
-                            attachRef.listAll().then((res) => {
-                                let attS = "";
-                                res.items.forEach((itemRef) => {
-                                attS=attS+itemRef.name+",";
-                                });
-                                const att_td = document.createElement("td");
-                                //att_td.appendChild(info_row);
-                                att_td.innerHTML=attS.slice(0,-1);
-                                info_row.appendChild(att_td)
-                            }).catch((error) => {
-                            console.log(error);
-                            });
-                            const td =document.createElement("td");
-                            td.innerHTML=Object.keys(snapshot.val())[sC];
-                            td.setAttribute("class","hidden");
-                            info_row.appendChild(td);
-                            
-                            info_tbody.appendChild(info_row);
-                            let sub_table = document.createElement("table");
-                            sub_table.setAttribute("class","subDiv");
-                            sub_table.style.width=(info_row.clientWidth*0.95)+"px";
-                            let sub_thead = document.createElement("thead");
-                            
-                            for(var thC=0;thC<sub_thL.length;thC++){
-                                let sub_th = document.createElement("th"); 
-                                sub_th.innerHTML = sub_thL[thC];
-                                sub_htr.appendChild(sub_th);
-                            };
-                            let sub_tbody = document.createElement("tbody");
-
-                            for(var trC=0;trC<valueC.length;trC++){
-                                let sub_tr =document.createElement("tr");
-                                for(var tdC=0;tdC<sub_thL.length;tdC++){
-                                    let sub_td = document.createElement("td");
-                                    sub_td.innerHTML = valueC[trC][sub_thL[tdC]];
-                                    sub_tr.appendChild(sub_td);
-                                }
-                                
-                                sub_tbody.appendChild(sub_tr);
-                            }
-                            sub_thead.appendChild(sub_htr);
-                            sub_table.appendChild(sub_thead);
-                            sub_table.appendChild(sub_tbody);
-                            info_tbody.appendChild(sub_table);
-                            info_row.addEventListener("click",(event)=>{
-                                const rowevent = event.target.parentNode;
-                                rowevent.classList.toggle("confirm");
-                                const rowIdx =rowevent.rowIndex-1;
-                                const parentEvent = rowevent.parentNode;
-                                const dataO=rowevent.cells[1].innerHTML;
-                                const tableIdx = parentEvent.getElementsByTagName("table")[rowIdx];
-                                console.log("rowIdx:"+rowIdx+"\n"+"parentEvent:"+parentEvent+"\n"+"dataOvalue:"+dataO+tableIdx);
-                                tableIdx.classList.toggle("active");
-                                hiddenRefPath=dataO+"/"+rowevent.cells[6].innerHTML;;
-                            });                             
-                            total_outcargo_count = total_outcargo_count+1
-                        }                         
-                    }
-                    document.getElementById("outcargo_case").innerHTML = "출고 건수:"+total_outcargo_count+" 건";
-                    document.getElementById("outcargo_qty").innerHTML = "총출고 수량:"+total_outcargo_qty+" (EA)";
-                    document.getElementById("outcargo_pty").innerHTML ="총출고 팔렛트수량:"+total_outcargo_pty+" (PLT)";
-                })
-            };
+          
             function outcargo_attachment(){
                 
                 const fileInput = document.getElementById("out_attachment");
@@ -685,14 +481,7 @@
                       get_datecount(); 
                 }   
             }
-            function outdataTrans(){
-                const dateS = document.getElementById("date_picker1").value;
-                const dateE = document.getElementById("date_picker2").value;
-                const consignorName = document.getElementById("out_consignee").value;
-                const dataInfo ={"dept":deptName,"client":clientName,"dateS":dateS,"dateE":dateE,"consignor":consignorName};
-                localStorage.setItem("BasicData",JSON.stringify(dataInfo));
-                window.open("wms_outcargoReport.html");
-            }
+           
             function sendMessage(){
                 toastMsg("출고요청 사항은"+deptName+" 에서 Server UpLodad 되면 재고 반영 됩니다.재고확인시 참고 바랍니다.");
                 // messaging.onMessage((payload)=>{
@@ -715,6 +504,8 @@
                 const consignorName = document.getElementById("out_consignee").value;
                     if (event.target.tagName === "TD") {
                       const row = event.target.parentNode;
+                      const rowH = row.parentNode.rows[row.rowIndex+1];
+                      return;
                       const msg ={"bl":row.cells[1].innerHTML,"des":row.cells[2].innerHTML,"remark":row.cells[12].innerHTML};
                       openPopup(msg);
                       return; 
@@ -891,12 +682,13 @@
                 }).showToast();
         };
         function openPopup(msg) {
-            const popup = document.getElementById('popup');
-            popup.style.display = 'block';
-            const popTitle =document.getElementById("popTitle");
-            const popRemark = document.getElementById("popUpRemarkEdit");
-            popTitle.innerHTML=msg["bl"];
-            popRemark.value = msg["remark"];
+            // const popup = document.getElementById('popup');
+            // popup.style.display = 'block';
+            // const popTitle =document.getElementById("popTitle");
+            // const popRemark = document.getElementById("popUpRemarkEdit");
+            // popTitle.innerHTML=msg["bl"];
+            // popRemark.value = msg["remark"];
+            // const tr = document.getElementById()
         }
         function closePopup() {
             const popup = document.getElementById('popup');
