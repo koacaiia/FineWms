@@ -32,9 +32,10 @@
     #table{
         border-collapse:collapse;
         border-spacing: 0;
-        width:99%;        
+        width:99vw;
+        height:100vh;        
         display:grid;
-        grid-template-rows: 1fr 1fr;
+        grid-template-rows: 4fr 1fr;
     }
     #outcargotitle{
         display:grid;
@@ -130,10 +131,10 @@
       #outcargo_results tr.active td{
         display:block;
         padding:1px;
-      }  
-      #outcargo_results{
-        width:99%;       
-        table-layout: fixed;
+    }  
+      #picTable{
+        /* width:99%;        */
+        /* table-layout: fixed; */
         word-break: break-all;
       }
       
@@ -387,9 +388,50 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         z-index: 9999;
     }
-    .inputUpdate{
+    .disBlock{
+        /* display:block; */
+        display:table-row;
+        /* table-layout: fixed;
+        word-break: break-all;
+        margin:0.5vh; */
+    }
+    #fileU{
+        display:grid;
+        grid-template-columns:3fr 1fr;
+    }
+    .fileA{
+        display:grid;
+        grid-template-rows:1fr 1fr;
+        background: rgb(184, 207, 242);
+        border-radius:5px;
+        padding:2px;
+        height:82%;
+        margin-top:2%;
+    }
+    #fileDiv{
+        height:100%;
+        display:grid;
+        grid-template-rows:1fr 1fr;
+    }
+    .result_title_input{
         display:none;
     }
+    #fileTitle{
+        text-align:center;
+    }
+    .imgTd{
+        width:100%;
+        height:30vh;
+    }
+    .picTh{
+        width:20vw;
+    }
+    .fileADivBtn{
+        display:grid;
+        grid-template-columns:1fr 1fr 1fr;
+    }
+    
+    
     
     
     
