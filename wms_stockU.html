@@ -45,12 +45,11 @@
     </script>
     
     <div class ="tableMainU">
-    <div id="table">
-        <div id="info">
+        <div id="infoU">
                 <div id="infoTitle">
                     <h6  id="depot_s"></h6>
                     <div id="titleUDiv">
-                        <select  id="titleU">
+                        <select title="titleU" id="titleU">
                         </select>
                     </div>
                     
@@ -149,56 +148,52 @@
                    
         </div>
         
-        <div id="fileU">
             <div id="picDiv">
-                <div id="fileTitle">서버저장 사진</div>
-                <div class="picDiv" id="picDiv">
-                    <table id = "picTable">
-                        <thead>
-                            <tr id =picTheadTr>
-                               
-                            </tr>
-                        </thead>
-                        <tbody id="out_tbody">
-                            <tr id="picTbodyTr">
-    
-                            </tr>
-                        </tbody>
-        
-                    </table>
-                </div>
-            </div>
-            <div id="fileDiv">
-                <div class="fileA">
-                    <div class="fileADiv">
-                        <div class="fileADivBtn">
+                <div id="fileTitle">
+                    <h6 id="fileTitleIn">서버저장 사진</h6>
+                    <div class="filePDiv">
                             <label for="out_attachment" class="upLoadLabel">
                                 <div class="btn_upload">첨부파일 선택</div>
                             </label>
                             <input type="file" id="out_attachment" value="첨부파일"  class = "result_title_input" onchange="outcargo_attachment()" multiple/>
-                            <input  class="resultDiv" type="button" id="out_attachment_del" value="파일초기화" onclick="outcargo_attachmentDel()"> 
-                            <button class="resultDiv" id ="out_submit"  onclick="outcargo_submit();">첨부파일<br>등록</button>   
+                            <label class="resultDiv" id="file_names">File Names</label>
+                            <button  class="resultDiv"  id=fileReset onclick="outcargo_attachmentDel()"> 파일초기화</button>
+                            <button class="resultDiv"  id=fileSubmit onclick="outcargo_submit();">첨부파일 등록</button>   
                         </div>
-                        <label class="resultDiv" id="file_names">File Names</label>
                     </div>
-                </div>
-                <div class="fileA">
-                    <div class="fileADiv">
-                        <div class="fileADivBtn">
-                            <label for="out_attachment" class="upLoadLabel">
-                                <div class="btn_upload">첨부사진 선택</div>
-                            </label>
-                            <input type="file" id="out_attachment" value="첨부파일"  class = "result_title_input" onchange="outcargo_attachment()" multiple/>
-                            <input  class="resultDiv" type="button" id="out_attachment_del" value="파일초기화" onclick="outcargo_attachmentDel()"> 
-                            <button class="resultDiv" id ="out_submit"  onclick="outcargo_submit();">첨부사진<br>등록</button>   
-                        </div>
-                        <label class="resultDiv" id="file_names">File Names</label>
+                    <div id="picTableDiv">
+                        <table id = "picTable">
+                            <thead>
+                                <tr id =picTheadTr>
+                                   
+                                </tr>
+                            </thead>
+                            <tbody id="out_tbody">
+                                <tr id="picTbodyTr">
+        
+                                </tr>
+                            </tbody>
+            
+                        </table>
                     </div>
-                </div>
+                    
             </div>
             
         </div>
-        </div>
+        <div id="popupA" class="popupA">
+            <div id="titleDiv">
+                <h4 id="popTitleA">Open Pop Up Window</h4>
+                <div class="close" onclick="closePopup();"></div>
+            </div>
+            
+            <img title="img" id="popImg">
+            <div id="popBtnDiv">
+                <button class="popBtn" id="preBtn" onclick="picPre();">&#8592;</button>
+                <button class="popBtn" id ="popPicUp" onclick="picDel();">사진삭제</button>
+                <button class="popBtn" id ="popPicDown" onclick="picDown();">사진저장</button> 
+                <button class="popBtn" id="nextBtn" onclick="picNex();">&#8594;</button>
+            </div>
+        </div>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
         <script >
             /*alert(clientName+" 에서 관리하는 화주가 "+  consignorData + "  로 확인 됩니다."+"\n화주 확인후 업무 진행 바랍니다.!")*/
@@ -208,11 +203,18 @@
             let fileNames=[];
             const head_title =["반입일","BL","품목","세부품목","반입수량(EA)","반입수량(PLT)","부족수량(SHORTAGE)_EA","출고가능수량(EA)","출고가능수량(PLT)","총재고수량(EA)","총재고수량(PLT)","적재수량(PLT당)","비고"];
             let tbody;
+            let refPic;
+            let refAttcahPic;
+            const trH = document.getElementById("picTheadTr");
+            const trB = document.getElementById("picTbodyTr");
+            let attachFileList;
+            let imageName;
             function getOutcargoData(consignorData){
             let total_outcargo_count=0;
             let total_outcargo_qty=0;
             let total_outcargo_pty=0;
-            clientName = document.getElementById("titleU").value;
+            // clientName = document.getElementById("titleU").value;
+            clientName="시노관세사";
             const table = document.getElementById('table_data');
             table.onclick=function(event){
                 const row = event.target.parentNode;
@@ -222,40 +224,17 @@
                       row.classList.toggle("confirm");
                       rowR.classList.toggle("disBlock");
                     };
-                const refPic = "DeptName/"+deptName+"/StockReport/"    
-                const refAttachPic = row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML+"/";
-                console.log(refPic+refAttachPic);    
-                storage_f.ref(refPic+refAttachPic).listAll().then((res)=>{
-                res.items.forEach((itemRef) => {
-                    const fileRef = storage_f.ref(refPic+refAttachPic+itemRef.name);
-                        fileRef.getDownloadURL().then(function(url) {
-                            console.log(url);
-                            console.log(itemRef.name);
-                            const th = document.createElement("th");
-                            th.setAttribute("class","picTh");
-                            th.innerHTML = itemRef.name;
-                            trH.appendChild(th);
-                            const td = document.createElement("td");
-                            td.setAttribute("class","picTh");
-                            const img = document.createElement("img");
-                            img.setAttribute("class","imgTd");
-                            img.src=url;
-                            td.appendChild(img);
-                            trB.appendChild(td);
-                        });
-                    });
-            });    
+                refPic = "DeptName/"+deptName+"/StockReport/"    
+                refAttachPic = row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML+"/";
+                document.getElementById("fileTitleIn").innerHTML=refAttachPic.replace("/","");
+                getAttach(refPic+refAttachPic);
             };
             document.getElementById('table_div').appendChild(table);
             tbody = document.getElementById("table_container");
-            const trH = document.getElementById("picTheadTr");
-            const trB = document.getElementById("picTbodyTr");
             let clicked_info = [];
             let clicked_item = new Array();
-            
             const refValue = database_f.ref("DeptName/"+
             deptName+"/ConsignorValue/"+clientName+"/"+consignorData+"/StockReport/");
-
             // const refValue = database_f.ref("DeptName/fine2/ConsignorValue/시노관세사/SPCGFS/StockReport/");
             var ref_arr = new Array();
             refValue.get().then((snapshot)=>{
@@ -338,11 +317,88 @@
                                
             });
             }
+            getOutcargoData("SPCGFS");
+            const imgP = document.getElementById("popImg");
+            let idx;
+            const titleP = document.getElementById("popTitleA");
+            function imgClicked(event,name){
+                idx=event.target.closest("td").cellIndex;
+                titleP.innerHTML=refAttachPic.replace("/",":")+"\n"+name;
+                const popImg = document.getElementById("popupA");
+                popImg.style.display="grid";
+                popImg.style.gridTemplateRows="10fr 75fr 10fr";
+                imgP.style.height="70vh";
+                imgP.style.width="100%"
+                imgP.src=attachFileList[idx];
+            };
+            function picPre(){
+                idx = idx-1;
+                imgP.src = attachFileList[idx];
+                titleP.innerHTML=imageName[idx];
+            };
+            function picNex(){
+                idx = idx+1;
+                imgP.src = attachFileList[idx];
+                titleP.innerHTML=imageName[idx];
+            };
+            function picDel(){
+                const imageU = document.getElementById("popImg").src;
+                console.log(imageU);
+                // const imageRef=storage_f.ref(refPic+title[0]+"/"+title[1]);
+                const imageRef = storage_f.refFromURL(imageU);
+                imageRef.delete().then(()=>{
+                    toastMsg("사진이 DataBase 에서 삭제 되었습니다.");
+                    getAttach(refPic+refAttachPic);
+                    closePopup();
+                })
+                .catch(function(error){
+                    toastMsg("사진 삭제중 문제가 발생하였습니다.\n"+error);
+                });
+            };
+            function picDown(){
+                const link = document.createElement("a");
+                link.href=document.getElementById("popImg").src;
+                link.download=document.getElementById("popTitleA").innerHTML.split(":")[1];
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                // console.log(btnDown+"/"+document.getElementById("popImg").src)
+                // btnDown.href=document.getElementById("popImg").src;
+            }
+            function getAttach(ref){
+                attachFileList=[];
+                imageName=[];
+                trH.replaceChildren();
+                trB.replaceChildren();
+                storage_f.ref(ref).listAll().then((res)=>{
+                res.items.forEach((itemRef) => {
+                    const fileRef = storage_f.ref(ref+itemRef.name);
+                        fileRef.getDownloadURL().then(function(url) {
+                            const th = document.createElement("th");
+                            th.setAttribute("class","picTh");
+                            th.innerHTML = itemRef.name;
+                            trH.appendChild(th);
+                            const td = document.createElement("td");
+                            td.setAttribute("class","picTh");
+                            const img = document.createElement("img");
+                            img.setAttribute("class","imgTd");
+                            img.onclick = function(){imgClicked(event,itemRef.name)};
+                            attachFileList.push(url);
+                            imageName.push(itemRef.name);
+                            img.src=url;
+                            td.appendChild(img);
+                            trB.appendChild(td);
+                        });
+                    });
+                   
+            });
+               
+            };
             function btn_excelwrite(){
                     const fileName = deptName+"_"+date+"_"+clientName+" 재고목록.xlsx";
                     const wb = XLSX.utils.table_to_book(document.getElementById('table_data'), {sheet:"test",raw:true});
                     XLSX.writeFile(wb, (fileName));
-                  } 
+                  }; 
             function outdataDel(){
                 const delConfirm = confirm(hiddenRefPath+"\n"+"출고요청 자료를 삭제 하시겠습니까?");
                 if(delConfirm){
@@ -357,11 +413,11 @@
                       tbody.remove();
                       get_datecount(); 
                 }   
-            }
+            };
            
             function sendMessage(){
                 toastMsg("출고요청 사항은"+deptName+" 에서 Server UpLodad 되면 재고 반영 됩니다.재고확인시 참고 바랍니다.");
-            }
+            };
             
         function consigneeOnclick(){
             const consignee = document.getElementById("out_consignee").value;
@@ -387,18 +443,10 @@
             // const tr = document.getElementById()
         }
         function closePopup() {
-            const popup = document.getElementById('popup');
+            const popup = document.getElementById('popupA');
             popup.style.display = 'none';
         }          
-        function submitPopUp(){
-
-        };
-        function picDown(){
-
-        };
-        function picUp(){
-
-        };
+       
         function btnUpdated(event){
             const rowU = event.target.parentNode.parentNode.parentNode;
             const rowO = document.getElementsByTagName("tr")[rowU.rowIndex-1];
@@ -438,10 +486,9 @@
 
         };
         function outcargo_attachment(){
-                
+                fileNames=[];                
                 const fileInput = document.getElementById("out_attachment");
                 const file = fileInput.files;
-                console.log(file);
                 const fileL=Object.keys(file).length;
                 let fileN ="";
                 for(var fileC=0 ; fileC<fileL;fileC++){
@@ -465,6 +512,20 @@
                 const fileEle=document.getElementById("file_names");
                 fileEle.innerHTML="File Names";
                 document.getElementById("out_attachment").value="";
+            }
+            function outcargo_submit(){
+                for(var aC=0;aC<fileNames.length;aC++){
+                            const storageRef =firebase.storage().ref();
+                            const fileRef = storageRef.child(refPic+refAttachPic+fileNames[aC].name);
+                            fileRef.put(fileNames[aC])
+                            .then(() => {
+                                console.log("Attach uploaded successfully!");
+                            })
+                            .catch((error) => {
+                                console.error("Attach uploading object: ", error);
+                            });;
+                        };
+                getAttach(refPic+refAttachPic);        
             }
 
         </script>

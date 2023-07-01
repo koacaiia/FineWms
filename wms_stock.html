@@ -38,8 +38,9 @@
             measurementId: "G-27CHK5X1W5"
         };
         firebase.initializeApp(firebaseConfig);
-        var database_f = firebase.database();
+        const database_f = firebase.database();
         const messaging = firebase.messaging();
+        const storage_f = firebase.storage();
         
     </script>
     
@@ -142,7 +143,7 @@
                 </table>
 
             </div>     
-           
+            
                    
         </div>
         
@@ -334,38 +335,50 @@
         </div>
     </div>
     <div id="popup" class="popup">
-        <h2 id="popTitle">Open Pop Up Window</h2>
+        <div id="titleDiv">
+            <h4 id="popTitleA">Open Pop Up Window</h4>
+            <div class="close" onclick="closePopup();"></div>
+        </div>
         <div id="popUpRemark">
             <input id="popUpRemarkEdit"/>
-            <button id="popUpRemarkBtn" onclick="popRemarkBtn();">비고사항 등록</button>
-        </div>
-        <div id="picRemark">
-            <h5>화물특이사항 관련사진</h5>
+            <button id="popUpRemarkBtn" onclick="popRemarkBtn();">비고사항<br> 등록</button>
+        </div >
+        <div id="picDiv">
             <table id="picRemarkTable">
-                <tr id="picReamrkTd"></tr>
+                <thead>
+                    <tr id="picHtr">
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="picBtr"></tr>
+                </tbody>
+                
             </table>
         </div>
-        <div id="picRelease">
-            <h5>화물출고사항 관련사진</h5>
-            <table id="picReleaseTable">
-                <tr id="picReleaseTd"></tr>
-            </table>
-        </div>
-        <div>
+            
+        <div id="picBtn">
             <button id ="popUpSub" onclick="submitPopUp();">출고등록</button>
-            <button id ="popPicUp" onclick="picUp()">사진업로드</button>
-            <button id ="popPicDown" onclick="picDown()">사진저장</button> 
-            <button onclick="closePopup();">창닫기</button>
+            <div class="result_titleP">
+                <label for="out_attachmentP" class="upLoadLabel">
+                    <div class="btn_upload">첨부파일 등록</div>
+                </label>
+                    <input type="file" id="out_attachmentP" value="첨부파일"  class = "result_title_input" onchange="outcargo_attachment()" multiple/>
+                <label class="resultDiv" id="file_names">File Names</label>
+                <input  class="resultDiv" type="button" id="out_attachment_delP" value="파일초기화" onclick="outcargo_attachmentDel()">    
+            </div>
         </div>
     </div>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
         <script >
-            /*alert(clientName+" 에서 관리하는 화주가 "+  consignorData + "  로 확인 됩니다."+"\n화주 확인후 업무 진행 바랍니다.!")*/
-            //sendMessage();
             let hiddenRefPath;
             let fileNames=[];
+            let clickedRef;
+            let clickedRemark;
+            let clickedEle;
             
             function getOutcargoData(consignorData){
+            document.getElementById("table_container").replaceChildren();
             let total_outcargo_count=0;
             let total_outcargo_qty=0;
             let total_outcargo_pty=0;
@@ -636,7 +649,6 @@
                 })
             };
             function outcargo_attachment(){
-                
                 const fileInput = document.getElementById("out_attachment");
                 const file = fileInput.files;
                 console.log(file);
@@ -695,32 +707,76 @@
             }
             function sendMessage(){
                 toastMsg("출고요청 사항은"+deptName+" 에서 Server UpLodad 되면 재고 반영 됩니다.재고확인시 참고 바랍니다.");
-                // messaging.onMessage((payload)=>{
-                //     console.log("message received");
-                // });
-                // console.log(messaging);
-                // messaging.requestPermission().then(function(){
-                //     console.log("Get Messaging Auth");
-                //     return messaging.getToken();
-                // })
-                // .then(function(token){
-                //     console.log("Fcm Token:",token);
-                    
-                // })
-                // .catch(function(e){
-                //     console.log("Occured Error In Get Messaing Auth",e);
-                // });
             }
             function tableClicked(event){
                 const consignorName = document.getElementById("out_consignee").value;
                     if (event.target.tagName === "TD") {
                       const row = event.target.parentNode;
+                      row.classList.toggle("confirm");
+                      const refPic = "DeptName/"+deptName+"/StockReport/"+row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML+"/";  
+                      clickedRef = "DeptName/"+deptName+"/ConsignorValue/"+clientName+"/"+consignorName+"/StockReport/"+row.cells[0].innerHTML+"_"+row.cells[1].innerHTML+"_"+row.cells[2].innerHTML+"_"+row.cells[4].innerHTML+"/";
+                      clickedRemark = row.cells[12].innerHTML;
                       const msg ={"bl":row.cells[1].innerHTML,"des":row.cells[2].innerHTML,"remark":row.cells[12].innerHTML};
-                      openPopup(msg);
-                      return; 
-                      const confirm_message = "BL: "+row.cells[1].innerHTML+"\n"+"품명: "+row.cells[2].innerHTML+"\n"+"화물에 대한 출고등록을 진행 하시겠습니까?";
-                      const confirm_check = confirm(confirm_message);
-                      if(confirm_check){
+                      openPopup(msg,refPic);
+                    };
+                  };
+        function consigneeOnclick(){
+            const consignee = document.getElementById("out_consignee").value;
+            alert(consignee+" 화주명 변경시 출고요청 등록은 되나 "+consignee+" 에 대한 내역 확인에서는 제외 됩니다.변경시에는 비고란에 별도의 내용 작성 추천 합니다.!")
+        };
+        function toastMsg(msg){
+            Toastify({
+                    text:msg,
+                    duration:5000,
+                    gravity:"center",
+                    position:"center",
+                    stopOnFocus: true, 
+                }).showToast();
+        };
+        function openPopup(msg,refPic) {
+            const popup = document.getElementById('popup');
+            popup.style.display="grid";
+            
+            popup.style.top=event.clientY+25+"px";
+            const popTitle =document.getElementById("popTitleA");
+            const popRemark = document.getElementById("popUpRemarkEdit");
+            popTitle.innerHTML=msg["bl"]+"_"+msg["des"];
+            popRemark.value = msg["remark"];
+            const picHtr = document.getElementById("picHtr");
+            const picBtr = document.getElementById("picBtr");
+            picHtr.replaceChildren();
+            picBtr.replaceChildren();
+            storage_f.ref(refPic).listAll().then((res)=>{
+                res.items.forEach((itemRef)=>{
+                    const fileRef= storage_f.ref(refPic+itemRef.name);
+                    fileRef.getDownloadURL().then(function(url){
+                        const th = document.createElement("th");
+                        th.setAttribute("class","picTh");
+                        th.innerHTML=itemRef.name;
+                        picHtr.appendChild(th);
+                        const td = document.createElement("td");
+                        td.setAttribute("class","picTh");
+                        const img = document.createElement("img");
+                        img.setAttribute("class","imgTd");
+                        img.addEventListener("click", function(){picDown(event)})
+                        img.src=url;
+                        td.appendChild(img);
+                        picBtr.appendChild(td);
+
+                    });
+                });
+            });
+        };
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }          
+        function submitPopUp(){
+            document.getElementById("popup").style.display="none";
+            const row = clickedEle;
+            // const confirm_message = "BL: "+row.cells[1].innerHTML+"\n"+"품명: "+row.cells[2].innerHTML+"\n"+"화물에 대한 출고등록을 진행 하시겠습니까?";
+            //           const confirm_check = confirm(confirm_message);
+            //           if(confirm_check){
                       row.classList.toggle("confirm");                    
                       const clicked_tr = document.createElement("tr");
                       const result_tbody = document.getElementById("out_tbody");
@@ -871,45 +927,34 @@
                         clicked_tr.appendChild(clicked_td);                        
                         };                    
                       };
-                    }else if(row.classList=="confirm"){
-                        row.classList.toggle("confirm");
-                    };                
-                    };
-                  };
-        function consigneeOnclick(){
-            const consignee = document.getElementById("out_consignee").value;
-            alert(consignee+" 화주명 변경시 출고요청 등록은 되나 "+consignee+" 에 대한 내역 확인에서는 제외 됩니다.변경시에는 비고란에 별도의 내용 작성 추천 합니다.!")
-        };
-        function toastMsg(msg){
-            Toastify({
-                    text:msg,
-                    duration:5000,
-                    gravity:"center",
-                    position:"center",
-                    // backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
-                    stopOnFocus: true, 
-                }).showToast();
-        };
-        function openPopup(msg) {
-            const popup = document.getElementById('popup');
-            popup.style.display = 'block';
-            const popTitle =document.getElementById("popTitle");
-            const popRemark = document.getElementById("popUpRemarkEdit");
-            popTitle.innerHTML=msg["bl"];
-            popRemark.value = msg["remark"];
-        }
-        function closePopup() {
-            const popup = document.getElementById('popup');
-            popup.style.display = 'none';
-        }          
-        function submitPopUp(){
+                    // }else if(row.classList=="confirm"){
+                    //     row.classList.toggle("confirm");
+                    // };
 
         };
-        function picDown(){
+        function picDown(event){
+            console.log(event.target);
+            const link = document.createElement("a");
+                link.href=event.target.src;
+                link.target="_blank";
+                // link.download=document.getElementById("popTitleA").innerHTML.split(":")[1];
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
 
         };
         function picUp(){
 
+        };
+        function popRemarkBtn(){
+            const remarkContent = document.getElementById("popUpRemarkEdit").value;
+            const confirmMsg = clickedRemark+" -> "+remarkContent+"\n로 비고사항 변경 합니다";
+            const confirmB = confirm(confirmMsg);              
+            if(confirmB){
+                database_f.ref(clickedRef).update({"비고":remarkContent}).then(
+                    getOutcargoData(document.getElementById("consignor").value))
+                .catch((error)=>{alert("비고항목 서번전송에 실패 했습니다\n"+error)});
+            }
         };
 
         </script>
