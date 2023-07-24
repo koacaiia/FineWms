@@ -107,6 +107,7 @@
                             const tableEle = document.getElementById("table_container");
                             tableEle.replaceChildren();
                             const consigName=event.target.value;
+                            console.log(consigName)
                             getOutcargoData(consigName);
                         });
                     </script>
@@ -152,10 +153,10 @@
                 <div id="fileTitle">
                     <h6 id="fileTitleIn">서버저장 사진</h6>
                     <div class="filePDiv">
-                            <label for="out_attachment" class="upLoadLabel">
+                            <label for="out_attachmentU" class="upLoadLabel">
                                 <div class="btn_upload">첨부파일 선택</div>
                             </label>
-                            <input type="file" id="out_attachment" value="첨부파일"  class = "result_title_input" onchange="outcargo_attachment()" multiple/>
+                            <input type="file" id="out_attachmentU" value="첨부파일"  class = "result_title_input" onchange="outcargo_attachment()" multiple/>
                             <label class="resultDiv" id="file_names">File Names</label>
                             <button  class="resultDiv"  id=fileReset onclick="outcargo_attachmentDel()"> 파일초기화</button>
                             <button class="resultDiv"  id=fileSubmit onclick="outcargo_submit();">첨부파일 등록</button>   
@@ -213,8 +214,8 @@
             let total_outcargo_count=0;
             let total_outcargo_qty=0;
             let total_outcargo_pty=0;
-            // clientName = document.getElementById("titleU").value;
-            clientName="시노관세사";
+            clientName = document.getElementById("titleU").value;
+            // clientName="시노관세사";
             const table = document.getElementById('table_data');
             table.onclick=function(event){
                 const row = event.target.parentNode;
@@ -317,7 +318,7 @@
                                
             });
             }
-            getOutcargoData("SPCGFS");
+            // getOutcargoData("SPCGFS");
             const imgP = document.getElementById("popImg");
             let idx;
             const titleP = document.getElementById("popTitleA");
@@ -487,7 +488,7 @@
         };
         function outcargo_attachment(){
                 fileNames=[];                
-                const fileInput = document.getElementById("out_attachment");
+                const fileInput = document.getElementById("out_attachmentU");
                 const file = fileInput.files;
                 const fileL=Object.keys(file).length;
                 let fileN ="";
