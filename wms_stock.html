@@ -249,7 +249,42 @@
            
         </div>
         </div>
-        <div class="stockMain">
+        <div id="configureMain">
+            <div id="remarkMain">
+                <div id="remarkMain1">
+                    <h3 id="remarkMainTitle">Select Item</h3>
+                    <button id="remarkMainSubmitBtn" onclick="submitPopup();">출고등록</button>
+                </div>
+                <div id="remarkMain2">
+                    <input id="remarkMainEdit"/>
+                    <button id="remarkMainEditBtn" onclick="popRemarkBtn();">비고사항등록</button>
+                </div>
+                <div class="result_titleP">
+                    <label for="out_attachmentP" class="upLoadLabel">
+                        <div class="btn_upload">첨부파일 선택</div>
+                    </label>
+                        <input type="file" id="out_attachmentP" value="첨부파일"  class = "result_title_input" onchange="outcargo_attachmentP();" multiple/>
+                    <label class="resultDiv" id="file_namesP">File Names</label>
+                    <input  class="resultDiv" type="button" id="out_attachment_delP" value="파일초기화" onclick="outcargo_attachmentDelP();">
+                    <input clsas="resultDiv" type="button" id="fileSubmitP" value="첨부파일 등록"
+                    onclick="fileSubmitP();">
+                </div>
+                <div id="popDiv">
+                    <table id="picRemarkTable">
+                        <thead>
+                            <tr id="picHtr">
+        
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="picBtr"></tr>
+                        </tbody>
+                        
+                    </table>
+                </div>
+
+            </div>
+            <div class="stockMain">
                 <div class="outcargoResultTitle">
                     
                     <div class="outcargoDate">
@@ -333,12 +368,15 @@
                 </div>
             
         </div>
+
+        </div>
+        
     </div>
     <div id="popup" class="popup">
         <div class="close" onclick="closePopup();"></div>
         <div id="titleDiv">
             <h4 id="popTitleA">Open Pop Up Window</h4>
-            <div id="picBtn">
+            <!-- <div id="picBtn">
                 <button id ="popUpSub" onclick="submitPopUp();">출고등록</button> 
                 <div class="result_titleP">
                     <label for="out_attachmentP" class="upLoadLabel">
@@ -349,14 +387,14 @@
                     <input  class="resultDiv" type="button" id="out_attachment_delP" value="파일초기화" onclick="outcargo_attachmentDelP();">
                     <input clsas="resultDiv" type="button" id="fileSubmitP" value="첨부파일 등록"
                     onclick="fileSubmitP();">
-                </div>
+                </div> -->
                 
             </div>
             <!-- <button  id ="popUpClose" onclick="submitPopUp();">btn</button> -->
             
         </div>
        
-        <div id="popDiv">
+        <!-- <div id="popDiv">
             <table id="picRemarkTable">
                 <thead>
                     <tr id="picHtr">
@@ -368,7 +406,7 @@
                 </tbody>
                 
             </table>
-        </div>
+        </div> -->
         <div id="popUpRemark">
             <input id="popUpRemarkEdit"/>
             <button id="popUpRemarkBtn" onclick="popRemarkBtn();">비고사항 등록</button>
@@ -785,8 +823,8 @@
             popup.style.gridTemplateRows="2vh 5vh 23.7vh 5vh";
             popup.style.top=event.clientY+60+"px";
             popup.style.height="38vh";
-            const popTitle =document.getElementById("popTitleA");
-            const popRemark = document.getElementById("popUpRemarkEdit");
+            const popTitle =document.getElementById("remarkMainTitle");
+            const popRemark = document.getElementById("remarkMainEdit");
             popTitle.innerHTML=msg["date"]+"_"+msg["bl"]+"_"+msg["des"];
             popRemark.value = msg["remark"];
             const picTable = document.getElementById("picRemarkTable");
@@ -819,7 +857,7 @@
             const popup = document.getElementById('popup');
             popup.style.display = 'none';
         }          
-        function submitPopUp(){
+        function submitPopup(){
             document.getElementById("popup").style.display="none";
                       const row = clickedEle;
                       row.classList.toggle("confirm");

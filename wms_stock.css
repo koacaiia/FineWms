@@ -519,7 +519,7 @@
     }
     #popDiv{
         overflow-x:scroll;
-        height:100%;
+        /* height:100%; */
         border:0.5px groove rgb(255, 255, 255);
         border-top-left-radius:10px;
         border-top-right-radius:10px;
@@ -612,6 +612,15 @@
     }
     #picBtr .picTh{
         width:14vw;
+    }
+    #configureMain{
+        display:grid;
+        grid-template-rows:1.5fr 3fr;
+    }
+    #remarkMain{
+        border: 2px ridge black;
+        border-radius:5px;
+        margin:10px;
     }
    
 
