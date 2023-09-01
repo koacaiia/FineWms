@@ -372,45 +372,8 @@
         </div>
         
     </div>
-    <div id="popup" class="popup">
-        <div class="close" onclick="closePopup();"></div>
-        <div id="titleDiv">
-            <h4 id="popTitleA">Open Pop Up Window</h4>
-            <!-- <div id="picBtn">
-                <button id ="popUpSub" onclick="submitPopUp();">출고등록</button> 
-                <div class="result_titleP">
-                    <label for="out_attachmentP" class="upLoadLabel">
-                        <div class="btn_upload">첨부파일 선택</div>
-                    </label>
-                        <input type="file" id="out_attachmentP" value="첨부파일"  class = "result_title_input" onchange="outcargo_attachmentP();" multiple/>
-                    <label class="resultDiv" id="file_namesP">File Names</label>
-                    <input  class="resultDiv" type="button" id="out_attachment_delP" value="파일초기화" onclick="outcargo_attachmentDelP();">
-                    <input clsas="resultDiv" type="button" id="fileSubmitP" value="첨부파일 등록"
-                    onclick="fileSubmitP();">
-                </div> -->
-                
-            </div>
-            <!-- <button  id ="popUpClose" onclick="submitPopUp();">btn</button> -->
-            
-        </div>
-       
-        <!-- <div id="popDiv">
-            <table id="picRemarkTable">
-                <thead>
-                    <tr id="picHtr">
-
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="picBtr"></tr>
-                </tbody>
-                
-            </table>
-        </div> -->
-        <div id="popUpRemark">
-            <input id="popUpRemarkEdit"/>
-            <button id="popUpRemarkBtn" onclick="popRemarkBtn();">비고사항 등록</button>
-        </div >    
+  
+     
         
     </div>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
@@ -818,11 +781,6 @@
                 }).showToast();
         };
         function openPopup(msg) {
-            const popup = document.getElementById('popup');
-            popup.style.display="grid";
-            popup.style.gridTemplateRows="2vh 5vh 23.7vh 5vh";
-            popup.style.top=event.clientY+60+"px";
-            popup.style.height="38vh";
             const popTitle =document.getElementById("remarkMainTitle");
             const popRemark = document.getElementById("remarkMainEdit");
             popTitle.innerHTML=msg["date"]+"_"+msg["bl"]+"_"+msg["des"];
@@ -837,9 +795,31 @@
                     const fileRef= storage_f.ref(refPic+itemRef.name);
                     fileRef.getDownloadURL().then(function(url){
                         const th = document.createElement("th");
+                        const thB = document.createElement("button");
+                        thB.style.height="3.5vh";
+                        thB.style.width="7.7vw";
+                        thB.style.fontWeight="bold";
+                        thB.innerHTML=itemRef.name.slice(-14,itemRef.name.length);
+                        thB.value=itemRef.name;
                         th.setAttribute("class","picTh");
-                        th.innerHTML=itemRef.name;
+                        thB.addEventListener("click",(event)=>{
+                            console.log(event.target.index);
+                            const picDel = confirm(event.target.value+" 사진을 삭제 합니까?");
+                            if(picDel){
+                                fileRef.delete().then(()=>{
+                                    console.log("Pic Deleted");
+                                    console.log(fileRef);
+                                }).catch(function(error){
+                                    console.log("Occured Error");
+                                })
+                            }else{
+
+                            }
+                            
+                        });
+                        // th.innerHTML=itemRef.name;
                         picHtr.appendChild(th);
+                        th.appendChild(thB);
                         const td = document.createElement("td");
                         td.setAttribute("class","picTh");
                         const img = document.createElement("img");

@@ -113,6 +113,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-messaging.js"></script> 
     <script >        
         const firebaseConfig = {
             apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
@@ -127,6 +128,7 @@
         firebase.initializeApp(firebaseConfig);
         const database_f = firebase.database();
         const auth = firebase.auth();
+        const message_f = firebase.messaging();
         const ui = new firebaseui.auth.AuthUI(firebase.auth());
     </script> 
 </head>
@@ -326,8 +328,35 @@
                 }
               
             });
+            
            
         }
+        const logo = document.getElementById("logo");
+        message_f.requestPermission()
+        .then(()=>{
+            console.log("Notication permission Granted");
+            message_f.getToken()
+            .then((token)=>{
+                if(token){
+                    console.log("Registration Token",token);
+                }else{
+                    console.log("No Registration Token available.");
+                }               
+            })
+            .catch((error)=>{
+                console.log("Error Getting Registration Token",error);
+            })
+
+        })
+        .catch((error)=>{
+            console.log("Unable to get Permission For Notification.".error);
+        });
+        logo.addEventListener("click",(event)=>{
+            alert(message_f);
+        });
+        message_f.onMessage((payload)=>{
+            alert("Message Received",payload);
+        });
        
     </script>
     

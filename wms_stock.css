@@ -478,12 +478,13 @@
         height:15vh;
     }
     .picTh .imgTd{
-        width:13.5vw;
-        height:21vh;
+        width:7vw;
+        height:15vh;
     }
-    .picTh{
-        width:14vw;
+    #picHtr{
+        height:3vh;
     }
+   
     .fileADivBtn{
         display:grid;
         grid-template-columns:1fr 1fr 1fr;
@@ -610,17 +611,39 @@
         table-layout:fixed;
         word-break:break-all;
     }
-    #picBtr .picTh{
-        width:14vw;
+    #picHtr .picTh{
+        width:8vw;
+        background: white;
     }
     #configureMain{
         display:grid;
-        grid-template-rows:1.5fr 3fr;
+        grid-template-rows:2fr 3fr;
     }
     #remarkMain{
+        display:grid;
+        grid-template-rows:3vh 3vh 4.6vh 23vh;
+        grid-gap:1vh;
         border: 2px ridge black;
         border-radius:5px;
         margin:10px;
+    }
+    #remarkMain1,#remarkMain2{
+        display:grid;
+        grid-template-columns:4fr 1fr;
+        vertical-align:middle;
+        height:100%;
+    }
+    #remarkMainSubmitBtn,#remarkMainEditBtn {
+        height:3.7vh;
+        margin:2%;
+    }
+    #remarkMainTitle{
+        padding-top:2%;
+        text-align:center;
+        vertical-align:middle;
+    }
+    #remarkMainEdit{
+        text-align:center;
     }
    
 
