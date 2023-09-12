@@ -332,6 +332,15 @@
            
         }
         const logo = document.getElementById("logo");
+        if("serviceWorker" in navigator){
+            navigator.serviceWorker.register("firebase-massaging-sw.js")
+            .then(function(registration){
+                console.loe("Registration Succeed Service Worker:",registration);
+            })
+            .catch(function(error){
+                console.log("Registration Failed Service Worker",error);
+            });
+        }
         message_f.requestPermission()
         .then(()=>{
             console.log("Notication permission Granted");
@@ -354,15 +363,7 @@
         logo.addEventListener("click",(event)=>{
             alert(message_f);
         });
-        if("serviceWorker" in navigator){
-            navigator.serviceWorker.register("firebase-massaging-sw.js")
-            .then(function(registration){
-                console.loe("Registration Succeed Service Worker:",registration);
-            })
-            .catch(function(error){
-                console.log("Registration Failed Service Worker",error);
-            });
-        }
+        
         message_f.onMessage((payload)=>{
             alert("Message Received",payload);
         });
