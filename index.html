@@ -354,6 +354,15 @@
         logo.addEventListener("click",(event)=>{
             alert(message_f);
         });
+        if("serviceWorker" in navigator){
+            navigator.serviceWorker.register("firebase-massaging-sw.js")
+            .then(function(registration){
+                console.loe("Registration Succeed Service Worker:",registration);
+            })
+            .catch(function(error){
+                cosole.log("Registration Failed Service Worker",error);
+            });
+        }
         message_f.onMessage((payload)=>{
             alert("Message Received",payload);
         });
