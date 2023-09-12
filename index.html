@@ -333,7 +333,7 @@
         }
         const logo = document.getElementById("logo");
         if("serviceWorker" in navigator){
-            navigator.serviceWorker.register("firebase-massaging-sw.js")
+            navigator.serviceWorker.register("firebase-messaging-sw.js")
             .then(function(registration){
                 console.loe("Registration Succeed Service Worker:",registration);
             })
