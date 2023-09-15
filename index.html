@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main</title>
+    <link rel="canonical" href="https://koacaiia.github.io/FineWms/firebase-messaging-sw.js"/>
     <style>
         #main{
             width:50vw;
@@ -333,7 +334,7 @@
         }
         const logo = document.getElementById("logo");
         if("serviceWorker" in navigator){
-            navigator.serviceWorker.register("firebase-messaging-sw.js")
+            navigator.serviceWorker.register("/FineWms/firebase-messaging-sw.js")
             .then(function(registration){
                 console.log("Registration Succeed Service Worker:",registration);
             })
