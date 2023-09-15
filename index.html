@@ -334,7 +334,7 @@
         }
         const logo = document.getElementById("logo");
         if("serviceWorker" in navigator){
-            navigator.serviceWorker.register("/FineWms/firebase-messaging-sw.js")
+            navigator.serviceWorker.register("/FineWms/firebase-messaging-sw.js",{scope:"/FineWms/"})
             .then(function(registration){
                 console.log("Registration Succeed Service Worker:",registration);
             })
