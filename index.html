@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main</title>
+    <style>
+        #main{
+            width:50vw;
+            height:90vh;
+            display:grid;
+            grid-template-rows:2fr 3fr 4fr;
+        }
+        #client{
+            display:grid;
+            grid-template-rows: 1fr 1fr 1fr;
+        }
+       
+        .ad{
+            display:grid;
+            grid-template-rows:1fr 1fr 1fr 1fr;
+            grid-gap:2vh;
+        }
+        .entry{
+            display:flex;
+            flex-direction:row;
+            justify-content: space-around;
+            align-items:center;
+        }
+        .title{
+            display:grid;
+            grid-template-rows:1fr 1fr;
+            align-items:center;
+        }
+        h4,h1{
+            text-align:center;
+        }
+        #sel_client_div{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+        }
+        #sel_consignor{
+            width:100%;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
+    <script >        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
+            authDomain: "finecargoinformation.firebaseapp.com",
+            databaseURL: "https://finecargoinformation-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "finecargoinformation",
+            storageBucket: "finecargoinformation.appspot.com",
+            messagingSenderId: "562937971880",
+            appId: "1:562937971880:web:98fb4152608485d72eae9d",
+            measurementId: "G-27CHK5X1W5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        let database_f = firebase.database();
+    </script> 
+</head>
+<body id="main">
+    <div class="title">
+        <h1>FINETRADING WMS</h1>
+        <div class="entry">
+            <h4>담당 부서</h4>
+            <select title ="모든 거래처" id ="sel_dept" >
+                <option value="fine2">Fine2</option>
+                <option value="fine1">Fine1</option>
+                <option value="fine">Fine</option>
+                <option value="fineP">Fine평택</option>
+            </select>        
+        </div>
+    </div>
+    
+    <div id="client">
+        <div id="sel_client_div">
+            <div >
+                <input type="text" value="업체명" id="id" onFocus="this.value='';return true;"onchange="selClient();">
+            </div >
+            <div>
+                <select title="화주명" id="sel_consignor">
+                </select>
+                <script>
+                </script>    
+            </div>
+
+        </div>
+        
+        <div >
+            <input type="password" value="비밀번호" id="pw"onFocus="this.value='';return true;">
+        </div>
+        <div id="btn">
+            <input type="button" value="Confirm" onclick="btn_reg()">
+        </div>
+    </div>
+    <div class ="ad">
+        <div class="entry">
+            <h4>administrator Entry</h4>
+            <input type="password" id="input_adpassword">
+        </div>
+        <input type="button" value="StockData UpLoad" onclick="btn_administrator_stock()">
+        <input type="button" value="OutCargoData DownLoad" onclick="btn_administrator_outcargoD()">
+        <input type="button" value="OutCargoData UpLoad" onclick="btn_administrator_outcargoU()">
+    </div>
+    
+    <script>
+        function btn_reg(){
+            var stock_link = 'wms_stock.html';
+            const clientValue = document.getElementById("id").value;
+            const deptValue = document.getElementById("sel_dept").value;
+            const consignValue = document.getElementById("sel_consignor").value;
+            const dataInfo ={"client" : clientValue,"dept":deptValue,"consignor":consignValue};
+            localStorage.setItem("BasicData",JSON.stringify(dataInfo));
+            window.location.href="wms_stock.html";
+        }
+        function btn_administrator_outcargoU(){
+            window.location.href="wms_reg.html";
+        }function btn_administrator_stock(){
+            window.location.href="wms_upload.html";
+        }
+        function btn_administrator_outcargoD(){
+            const deptValue = document.getElementById("sel_dept").value;
+            const dataInfo ={"dept":deptValue};
+            localStorage.setItem("BasicData",JSON.stringify(dataInfo));
+            window.location.href="wms_outcargoReport.html";
+        }
+        function selClient(){
+            const clientValue = document.getElementById("id").value;
+            const deptValue = document.getElementById("sel_dept").value;
+            const refPath = database_f.ref("DeptName/"+deptValue+"/ConsignorValue/"+clientValue);
+            refPath.get().then((snapshot)=>{
+                const snapV = snapshot.val();
+                const snapKeys = Object.keys(snapV);
+                const sel = document.getElementById("sel_consignor");
+                for(let sC in snapKeys){
+                    const op = document.createElement("option");
+                    op.value= snapKeys[sC];
+                    op.text = snapKeys[sC];
+                    sel.appendChild(op);
+                }
+
+            });
+
+        }
+    </script>
+    
+</body>
+</html>

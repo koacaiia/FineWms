@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        var coworkers={
+            "programmer":"egoing",
+            "designer":"leezche"
+        }
+        document.write("programmer:"+coworkers.programmer+"<br>")
+        document.write("designer:"+coworkers.designer+"<br>");
+        coworkers.bookkeeper = "duru";
+        document.write("bookkeeper:"+coworkers.bookkeeper+"<br>")
+        coworkers["data scientist"]="taeho";
+        document.write("data scientist:"+coworkers["data scientist"]);
+
+    </script>
+    <script>
+        for(var value in coworkers){
+            document.write("<br>"+coworkers[value]+"<br>")
+        }
+    </script>
+    <h1>Property Method</h1>
+    <script>
+        coworkers.showAll = function(){
+            var i=0;
+            var arrLen=Object.keys(coworkers).length;
+            for(var key in this){
+                if (i!==arrLen-1){
+                    document.write(key+":"+this[key]+":"+arrLen+"<br>");
+                    i=i+1;
+                }
+                
+            }
+        }
+        coworkers.showAll();
+    </script>
+    
+</body>
+</html>

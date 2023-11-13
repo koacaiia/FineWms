@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data_Do</title>
+    <style>
+        .titleImg{
+            width:100%;
+        }
+        .mainDiv{
+            display:grid;
+            grid-template-rows:1fr 10fr;
+            width:21cm;
+            height:29cm;
+            border:0.3px dotted black;
+            margin:0px;
+        }
+        .mainContent{
+            display:grid;
+            grid-template-rows:0.7fr 2.5fr;
+        }
+        .contentInfo{
+            display:grid;
+            grid-template-rows:1fr 1fr 1fr 2fr 2fr;
+            border:2px groove #000;
+            height:7cm;
+        }
+        .contentInfo1{
+            display:grid;
+            grid-template-columns:1fr 2fr 1fr 2fr;
+            border:0.5px solid #000;
+        }
+        .contentDataTr{
+            display:grid;
+            grid-template-columns:1fr 2fr 1fr 2fr;
+            border:0.5px solid #000;
+            height:60px;
+        }
+        .contentInfo2{
+            display:grid;
+            grid-template-rows:1fr 1fr;
+        }
+        .contentInfo3{
+            display:grid;
+            grid-template-columns:1fr 1.5fr;
+        }
+        .cargo_delivery_detail{
+            display:grid;
+            grid-template-columns:1fr 1fr 1fr;
+        }
+        h3,h5,h4{
+           text-align:center;
+           vertical-align:middle; 
+           margin:0px;
+           padding:0px;
+           height:100%;
+           border:0.5px solid #000;
+           display:flex;
+           justify-content: center;
+           align-items :center;
+        }
+        .sideMenu{
+            display: grid;
+            grid-template-rows: 1fr 1fr 3fr;
+            width: 20vh;
+            height: 10vw;
+            border: 2px solid black;
+            margin-left:2vw;
+        }
+        a{
+            height:5vh;
+            width:30vw;
+        }
+        #body{
+            display:flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+        .hiddeb{
+            display:none;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script> 
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-storage.js"></script>      
+    <script >        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
+            authDomain: "finecargoinformation.firebaseapp.com",
+            databaseURL: "https://finecargoinformation-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "finecargoinformation",
+            storageBucket: "finecargoinformation.appspot.com",
+            messagingSenderId: "562937971880",
+            appId: "1:562937971880:web:98fb4152608485d72eae9d",
+            measurementId: "G-27CHK5X1W5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var database_f = firebase.database();
+        var storage_f = firebase.storage();
+        
+    </script>
+</head>
+<body>
+    <div id="body">
+    <div class="mainDiv">
+        <div class="title">
+            <img class ="titleImg" src ="DoTitle.jpg" alt="">
+        </div>
+        <div class="mainContent">
+            <div class="contentInfo">
+                <div class="contentInfo1">
+                    <div><h3>차량번호</h3></div>
+                    <div><h3></h3></div>
+                    <div><h3>도착지</h3></div>
+                    <div><h3 id="cargo_destination"></h3></div>
+                </div>
+                <div class="contentInfo1">
+                    <div><h3>차량종류</h3></div>
+                    <div><h3 ></h3></div>
+                    <div><h3>화주명</h3></div>
+                    <div><h3 id="cargo_client"></h3></div>
+                </div>
+                <div class="contentInfo1">
+                    <div><h3>출고수량</h3></div>
+                    <div class="cargo_delivery_detail">
+                        <div><h3 id="cargo_out_ea"></h3></div>
+                        <div><h3 id="cargo_out_plt"></h3></div>
+                        <div><h3 id="cargo_out_pb"></h3></div>
+                    </div>                    
+                    <div><h3>출고일자</h3></div>
+                    <div><h3 id="cargo_date"></h3></div>
+                </div>
+                <div class="contentInfo1">
+                    <div><h3>운송기사</h3></div>
+                    <div class="contentInfo2">
+                        <div class="contentInfo3"><h3>성명</h3><h3></h3></div>
+                        <div class="contentInfo3"><h3>연락처</h3><h3></h3></div>
+                    </div> 
+                    <div><h3>출고담당자</h3></div>
+                    <div class="contentInfo2">
+                        <div class="contentInfo3"><h3>성명</h3><h3></h3></div>
+                        <div class="contentInfo3"><h3>연락처</h3><h3></h3></div>
+                    </div> 
+                </div>
+                <div class="contentInfo1">
+                    <div><h3>ORDER#.</h3></div>
+                    <div class="contentInfo2">
+                        <div ><h3>B/L번호</h3></div>
+                        <div><h3>내국관리번호</h3></div>
+                    </div> 
+                    <div><h3>Description</h3></div>
+                    <div class="contentInfo2">
+                        <div><h3>Delivery</h3></div>
+                        <div class="cargo_delivery_detail">
+                            <div><h5>QTY</h5></div>
+                            <div><h5>PALLET</h5></div>
+                            <div><h5>REMARK</h5></div>
+                        </div>
+                        
+                    </div> 
+                </div>
+                <script>
+                    const getinfoOb= JSON.parse(sessionStorage.getItem("infoOb"));
+                    document.getElementById("cargo_destination").innerHTML=getinfoOb["출고처"];
+                    document.getElementById("cargo_client").innerHTML=getinfoOb["화주명"];
+                    document.getElementById("cargo_out_ea").innerHTML=getinfoOb["출고요청수량(EA)"]+"(EA)"
+                    document.getElementById("cargo_out_plt").innerHTML=getinfoOb["출고요청수량(PLT)"]+"(PLT)";
+                    let pb = "P";
+                    const infoPlt = parseInt(getinfoOb["출고요청수량(PLT)"]);
+                    if(infoPlt<=0){
+                        pb="B"
+                    };
+                    document.getElementById("cargo_out_pb").innerHTML=pb;
+                    document.getElementById("cargo_date").innerHTML=getinfoOb["출고일"]
+
+                </script>    
+            </div>
+            <div class="contentData">
+                
+            </div>
+        </div>
+    </div>
+    <div class="sideMenu">
+        <button onclick="printDo()">출고증 인쇄 </button>
+        <h5> 첨부파일 </h5>
+        <table class="contentTable">
+            <tbody id="content_tbody">
+
+            </tbody>
+        </table>
+
+
+    </div>
+</div>
+<script>
+        function getAttach(){
+            const sideDiv =document.getElementsByClassName("sideMenu")[0];
+            const getinfoOb = JSON.parse(sessionStorage.getItem("infoOb"));
+            const refA = getinfoOb["refI"];
+            const refAttach =storage_f.ref(refA+"/Attachment/");
+            const attTbody = document.getElementById("content_tbody");
+            refAttach.listAll().then((res)=>{
+                res.items.forEach((itemRef) => {
+                    const fileRef = storage_f.ref(refA+"/Attachment/"+itemRef.name);
+                        fileRef.getDownloadURL().then(function(url) {
+                            const attTr = document.createElement("tr");
+                            attTbody.appendChild(attTr);
+                            const attTd = document.createElement("td");
+                            attTr.appendChild(attTd);
+                            const attachF = document.createElement("a");
+                            attachF.href = url;
+                            attachF.innerHTML=itemRef.name;
+                            attachF.target ="_blank"
+                            attTd.appendChild(attachF);
+                           /* var a = document.createElement('a');
+                            a.href = url;
+                            a.download = fileRef.name;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);*/
+                         
+                        /*console.log(url);
+                        const xhr = new XMLHttpRequest();
+                        xhr.responseType = 'blob';
+                        xhr.onload = (event) => {
+                        const blob = xhr.response;
+                        };
+                        xhr.open('GET', url);
+                        xhr.send();
+                        }).catch(function(error) {
+                        console.log(error);*/
+                        });
+                    });
+            });
+        }
+        function getcontentData(){
+            let parentDiv=document.getElementsByClassName("contentData")[0];
+            const getcontentOb = JSON.parse(sessionStorage.getItem("contentOb"));
+            for(var cC=1; cC<=Object.keys(getcontentOb).length;cC++){
+                let trValue = "tr"+cC;
+                let contentDataTr = document.createElement("div");
+                parentDiv.appendChild(contentDataTr);
+                contentDataTr.setAttribute("class","contentDataTr");
+                let contentDataOrder = document.createElement("h4");
+                contentDataOrder.innerHTML= getcontentOb[trValue]["Lot"];
+                contentDataTr.appendChild(contentDataOrder);
+                let contentDataBl = document.createElement("h4");
+                contentDataBl.innerHTML = getcontentOb[trValue]["BL"];
+                contentDataTr.appendChild(contentDataBl);
+                let contentDataDesc = document.createElement("h4");
+                contentDataTr.appendChild(contentDataDesc);
+                contentDataDesc.innerHTML=getcontentOb[trValue]["품명"];
+                let contentDataDelDetail = document.createElement("div");
+                contentDataTr.appendChild(contentDataDelDetail);
+                contentDataDelDetail.setAttribute("class","cargo_delivery_detail");
+                let contentDataQty = document.createElement("h5");
+                contentDataQty.innerHTML=getcontentOb[trValue]["출고요청수량(EA)"];
+                contentDataDelDetail.appendChild(contentDataQty);
+                let contentDataPlt = document.createElement("h5");
+                contentDataPlt.innerHTML=getcontentOb[trValue]["출고요청수량(PLT)"];
+                contentDataDelDetail.appendChild(contentDataPlt);
+                let contentDataRemark = document.createElement("h5");
+                contentDataRemark.innerHTML=getcontentOb[trValue]["출고요청사항"];
+                contentDataDelDetail.appendChild(contentDataRemark);
+            }
+            getAttach();
+        }
+        getcontentData();
+        
+        function printDo(){
+           
+            const printContents = document.getElementsByClassName("mainDiv")[0].innerHTML;
+            const originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+        }
+ 
+
+</script>    
+</body>
+</html>

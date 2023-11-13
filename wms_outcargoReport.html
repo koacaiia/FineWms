@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OutCargoReport</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <link href="./datepicker/css/datepicker.min.css" rel="stylesheet" type="text/css" media="all">
+    <!-- Air datepicker css -->
+    <script src="./datepicker/js/datepicker.js"></script> <!-- Air datepicker js -->
+    <script src="./datepicker/js/datepicker.ko.js"></script> <!-- 달력 한글 추가를 위해 커스텀 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+    <script >
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE0-oW929KMOkpnhdgPjDFMwuCex50C2s",
+            authDomain: "finecargoinformation.firebaseapp.com",
+            databaseURL: "https://finecargoinformation-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "finecargoinformation",
+            storageBucket: "finecargoinformation.appspot.com",
+            messagingSenderId: "562937971880",
+            appId: "1:562937971880:web:98fb4152608485d72eae9d",
+            measurementId: "G-27CHK5X1W5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var database_f = firebase.database();
+    </script>
+    <style>
+        .mainDiv{
+            width:100vw;
+            height:100vh;
+            display:grid;
+            grid-template-rows:10vh 90vh;
+        }
+        .tableDiv{
+            display:grid;
+            grid-template-columns:2.5fr 1fr;
+        }
+        h3{
+            text-align: center;
+            vertical-align: middle;
+        }
+        table{
+            width:100%;
+            table-layout:fixed;
+            word-break:break-all;
+            border:1px solid #000;
+            text-align:center;
+        }
+        table tbody tr:hover{
+            background-color: lightgray;
+            cursor:pointer;
+        }
+        .hidden{
+            display:none;
+        }
+        .subTable{
+            height:0;
+            overflow:hidden;
+            display:none;
+            transition: all 1s;
+            margin-bottom:- 10px;
+        }
+        .active{
+            display:block;
+            width:50vw;
+            height:auto;
+        }
+        .select{
+            background-color:beige;
+            color: black;
+            font-weight: bold;
+        }
+        
+        .afterDivSubBtn ,.beforeDivInfo{
+            display:grid;
+            grid-template-columns:2fr 5fr 1fr 1fr 1fr;
+            grid-gap:1vw;
+            margin-top:2vh;
+            margin-bottom:2vh;
+            margin-left:5vw;
+            margin-right:5vw;
+        }
+        .afterDivSubBtn h3,.beforeDivInfo h3,#reg_consignor,h1{
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            height:100%;
+        }
+        #btn_subreg ,#btn_selectreg{
+            margin:1vh;
+        }
+        
+        .beforeTableContainer,.afterTableContainer{
+            overflow-y:scroll;
+            margin:0px;
+            padding:15px;
+        } 
+        tr,td{
+            height:5vh;
+            border:0.5px solid black;
+        }
+        th{
+            height:5vh;
+            border:2px groove black;
+            
+        }
+        .beforeDiv,.afterDiv{
+            display:grid;
+            grid-template-rows:1fr 9fr;
+        }
+        .outcargoDate{
+            display:grid;
+            grid-template-columns:1fr 0.1fr 1fr 1fr;
+            height:100%;
+            grid-gap:30px;
+        }
+        .outcargoDateS input{
+            height:100%;
+            width:100%;
+        }      
+        .titleDiv{
+            margin-top:1%;
+            margin-left:15%;
+            margin-right:15%;
+        }
+        #sel_client{
+            height:100%;
+            text-align:center;
+        }
+        button {
+            background: rgb(208, 216, 222);
+            font-size: small;
+            background: linear-gradient(to top, black,5%, rgb(211, 224, 244));
+        }
+        .hidden{
+            display:none;
+        }
+        #clientDiv{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            height:100%;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="mainDiv">
+        <div class="afterDivSubBtn">
+            <div id="clientDiv">
+                <select title ="모든 거래처" id ="sel_client" onchange="changeConsignor();" >
+                </select>
+                <select id="sel_consignor" title="화주명" >
+                </select>
+                <script>
+                    var basicData= JSON.parse(localStorage.getItem("BasicData"));
+                    var clientName=basicData["client"];
+                    var consignorName = basicData["consignor"];
+                    var deptName = basicData["dept"];
+                    console.log(clientName+consignorName);
+                    if(clientName!=null){
+                        const sel = document.getElementById("sel_client");
+                        const op = document.createElement("Option");
+                        op.value=clientName;
+                        op.text=clientName;
+                        sel.appendChild(op);
+                        const sel_con = document.getElementById("sel_consignor");
+                        const opC = document.createElement("Option");
+                        opC.value=consignorName;
+                        opC.text=consignorName;
+                        sel_con.appendChild(opC);
+                    }else{
+                        const refPath="DeptName/"+deptName+"/ConsignorValue";
+                        const refValue = database_f.ref(refPath);
+                        refValue.get().then((snapshot=>{
+                            const value= snapshot.val();
+                            const valueKey = Object.keys(value);
+                            const valueValue = Object.values(value);
+                            const sel = document.getElementById("sel_client");
+                            const op = document.createElement("Option");
+                            op.value="모든거래처";
+                            op.text="모든거래처";
+                            sel.appendChild(op);
+                            for(let k in valueKey){
+                                const clientKey = Object.keys(valueValue[k]);
+                                const op = document.createElement("Option");
+                                    op.value= valueKey[k];
+                                    op.text = valueKey[k];
+                                    sel.appendChild(op);
+                            }
+                        }))
+                    }
+                </script>
+                
+            </div>
+            
+            <div class="outcargoDate">
+                <div class="outcargoDateS">
+                    <input type="button" value="시작일" id="date_picker1" />
+                </div>
+                <div class="outcargoDateS">
+                    <h1>~</h1>
+                </div>
+                <div class="outcargoDateS">
+                    <input type="button" value="종료일" id="date_picker2" >
+                </div>
+                <div class="outcargoDateS">
+                    <input type="button" id="date_count" value="출고현황 검색" onclick="get_datecount()"/>
+                </div>
+                <script>
+                    function transDate(dateT){
+                        let result_month = dateT.getMonth()+1;
+                        let result_day =dateT.getDate();
+                        if(result_month<10){
+                            result_month ="0"+result_month;
+                        };
+                        if(result_day <10){
+                            result_day = "0"+result_day;
+                        };
+                        var result_date = dateT.getFullYear()+"-"+result_month+"-"+result_day;
+                        return result_date;
+                    }
+                    document.getElementById("date_picker1").value=transDate(new Date());
+                    document.getElementById("date_picker2").value=transDate(new Date());
+                    $("#date_picker1").datepicker({
+                        language: 'ko'
+                    });
+                    $("#date_picker2").datepicker({
+                        language: 'ko'
+                    });
+                </script>
+            </div> 
+            <button class="outcargoDateS" id="btn_forwardingFee" onclick="forwardingFee();">기간내 출고료 정산</button>
+            <button class="outcargoDateS" id="btn_storageFee" onclick="storageFee();">기간내 재고<br>보관료 정산</button>
+            <button class="outcargoDateS" id="btn_excelFile" onclick="excelFile();">Excel File</button> 
+
+        </div>
+            <div class="afterTableContainer">
+                <table class="afterTable">
+                    <thead>
+                        <tr>
+                            <th>화주명</th>
+                            <th>출고일</th>
+                            <th>출고처</th>
+                            <th>BL</th>
+                            <th>품명</th>
+                            <th>Lot</th>
+                            <th>출고요청수량<br>(EA)</th>
+                            <th>출고요청수량<br>(PLT)</th>
+                            <th>출고요청사항</th>
+                            <th class="hidden">보관료발생일</th>
+                            <th class="hidden">보관료적용일수</th>
+                            <th class="hidden">보관요율(팔렛트당)</th>
+                            <th class="hidden">출고보관료</th>
+                        </tr>
+                    </thead>
+                    
+                </table>
+            </div>
+            
+        </div>
+    </div>
+    <script>
+        var deptV ="fine2";
+        var client;
+        var dateS;
+        var dateE;
+        var thList =["화주명","출고일","출고처","BL","품명","Lot","출고요청수량(EA)","출고요청수량(PLT)","출고요청사항","보관료발생일","보관요율(팔렛트당)","출고보관료"];
+        const basicDataL = Object.keys(basicData).length;
+        if(basicData["dateS"]!=null){
+            deptV = basicData["dept"];
+            dateS = basicData["dateS"];
+            dateE = basicData["dateE"];
+            document.getElementById("date_picker1").value=dateS;
+            document.getElementById("date_picker2").value=dateE;
+            get_datecount();
+        };
+        
+        function getOutcargoReport(date){
+            const refPath="DeptName/"+deptV+"/OutCargoReport/"+date;
+            const refValue = database_f.ref(refPath);
+            let outPty;
+            const clientValue = document.getElementById("sel_client").value;
+            refValue.get().then((snapshot)=>{
+                const snapValue = snapshot.val();
+                if(snapValue==null){
+                    //alert(date+" 출고자료 없는것으로 확인 됩니다.");
+                    return;
+                }
+                const clientValue = Object.keys(snapValue);
+                let aTable = document.getElementsByClassName("afterTable")[0];
+                let aTbody = document.getElementById("outcargo_tbody");
+                
+                for(let keyC=0;keyC<clientValue.length;keyC++){
+                    let outcargoReportC = snapValue[clientValue[keyC]]["Content"];
+                    let outcargoReportI = snapValue[clientValue[keyC]]["Info"];
+                    let clientName = document.getElementById("sel_client").value;
+                    const clientNameT = JSON.parse(localStorage.getItem("BasicData"))["client"];
+                    if(clientNameT==null){
+                        clientName=outcargoReportI["화주명"];
+                    }
+                    if(date==outcargoReportI["출고일"]&&clientName ==outcargoReportI["화주명"]){
+                    let infoC =Object.keys(outcargoReportI);
+                    let outcargoRec =Object.keys(outcargoReportC);
+                    let outcargoL = outcargoRec.length;
+                    for(let cL in outcargoRec){
+                    outPty = outcargoReportC[outcargoRec[cL]]["출고요청수량(PLT)"];    
+                    let aTr = document.createElement("tr");
+                    aTr.addEventListener("click",(event)=>{
+                        let rowTarget = event.target.parentNode;
+                        rowTarget.classList.toggle("select");
+                        let rowsIndex = rowTarget.rowIndex-1;
+                        let targetTable = aTbody.getElementsByClassName("subTable")[rowsIndex];
+                        targetTable.classList.toggle("active");
+                    })
+                    for(var m=0;m<thList.length-3;m++){
+                        if(outcargoReportC["Process"]!="Holding"||outcargoReportC["Process"]!=null){
+                            let aTd = document.createElement("td");
+                            aTd.innerHTML = outcargoReportC[outcargoRec[cL]][thList[m]];
+                            aTr.appendChild(aTd);
+                        }else{
+                            let aTd = document.createElement("td");
+                            aTd.innerHTML = outcargoReportC[outcargoReC[cL]][thList[m]];
+                            aTr.appendChild(aTd);
+                        }
+                    }
+                    aTbody.appendChild(aTr);
+                    const refPath = outcargoReportC[outcargoRec[cL]]["refS"];
+                    const refStock = database_f.ref(refPath);
+                    refStock.get().then((snapshot=>{
+                        const value= snapshot.val();
+                        const storageFee = value["보관요율(팔렛트당)"];
+                        const storageDate = value["보관료발생일"];
+                        const outDate = new Date(outcargoReportI["출고일"]);
+                        const inDate = new Date(value["반입일"]);
+                        const firstDate = new Date(outDate.getFullYear(),outDate.getMonth(),1);
+                        const storageDateApply = transDate(new Date(document.getElementById("date_picker1").value));
+                        let storageFeeDate;
+                        let outcargoFee;
+                        let elapseDate=0;
+                        let curDate;
+                        let countDateList =[];
+                        if(new Date(storageDate)>new Date(outDate)){
+                            outcargoFee=0;
+                            elapseDate="In FreeTime";
+                        }else if(new Date(storageDate)>new Date(storageDateApply)){
+                            storageFeeDate = storageDate;
+                            curDate = new Date(storageFeeDate);
+                            while(curDate<=outDate){
+                                countDateList.push(transDate(curDate));
+                                curDate.setDate(curDate.getDate() +1)
+                                elapseDate =elapseDate +1;
+                            }
+                            outcargoFee = parseInt(elapseDate)*parseInt(outPty)*parseInt(storageFee);
+                        }else{
+                            storageFeeDate = storageDateApply;
+                            curDate = new Date(storageFeeDate);
+                            console.log("2"+curDate);
+                            while(curDate<=outDate){
+                                countDateList.push(transDate(curDate));
+                                curDate.setDate(curDate.getDate() +1)
+                                elapseDate =elapseDate +1;
+                            }
+                            outcargoFee = parseInt(elapseDate)*parseInt(outPty)*parseInt(storageFee);
+                        }
+                        for(var storageC=0; storageC<3;storageC++){
+                            const td =document.createElement("td");
+                            switch(storageC){
+                                case 0:
+                                td.innerHTML=storageDate;
+                                break;
+                                case 1:
+                                td.innerHTML=elapseDate;
+                                break;
+                                case 2:
+                                td.innerHTML=storageFee;
+                                break;
+                                case 3:
+                                td.innerHTML=outcargoFee;
+                                break;
+                            }
+                            td.setAttribute("class","hidden");
+                            aTr.appendChild(td);
+                        }
+                        aTbody.appendChild(aTr);
+                    }));
+
+                    /*if(outcargoReportC["Process"]=="Holding"||outcargoReportC["Process"]==null){
+                        let aTd = document.createElement("td");
+                        aTd.value = outcargoReportC["refI"];
+                        aTd.setAttribute("class","hidden");
+                        aTr.appendChild(aTd);
+                        aTbody.appendChild(aTr);
+                    }else{
+                        let aTd = document.createElement("td");
+                        aTd.value = outcargoReportC["refI"];
+                        aTd.setAttribute("class","hidden");
+                        aTr.appendChild(aTd);
+                        aTbody.appendChild(aTr);
+                    }*/
+                    }
+                }
+                }
+                });
+        }
+        function get_datecount(){
+            const tBodyEle= document.getElementById("outcargo_tbody");
+            if(tBodyEle !== null){
+                console.log("element Checked!");
+                tBodyEle.remove();
+            }
+            let aTable = document.getElementsByClassName("afterTable")[0];
+            let aTbody = document.createElement("tbody");
+            aTbody.id="outcargo_tbody";
+            aTbody.setAttribute("class","aTbody");
+            aTable.appendChild(aTbody);
+            //sDate = new Date(document.getElementById("date_picker1").value);
+            //eDate = new Date(document.getElementById("date_picker2").value);
+            sDate = new Date("2023-05-08");
+            eDate = new Date("2023-05-20");
+            var curDate = sDate;
+            const countDateList = []
+            while(curDate<=eDate){
+                countDateList.push(transDate(curDate));
+                curDate.setDate(curDate.getDate() +1)
+            }
+            const delParent = document.getElementsByClassName("beforeTable")[0];
+            const delChild = document.getElementsByClassName("bTbody");
+            for(var delB=0 ; delChild.length;delB++){
+                delChild[delB].remove();
+            }
+
+            for(let dateC in countDateList){
+                getOutcargoReport(countDateList[dateC]);
+            }
+
+        }
+        function forwardingFee(){
+            const hiddenEle = document.querySelectorAll(".hidden");
+            console.log(hiddenEle);
+            for(let hC in hiddenEle){
+                console.log(hiddenEle[hC]);
+                hiddenEle[hC].classList.toggle("hidden");
+            }
+        }
+        function storageFee(){
+            const consigName = document.getElementById("sel_client").value;
+            if(consigName=="모든거래처"){
+                alert(consigName +" 로 확인 됩니다."+"\n"+"거래처 확인후 정산 확인 바랍니다.!");
+                return;
+            }
+            const refPath="DeptName/"+deptName+"/ConsignorValue/"+clientName;
+            refPath.get().then((snapshot)=>{
+
+            });
+        }
+        function changeConsignor(){
+            const selClientName = document.getElementById("sel_client").value
+            const clientValue = database_f.ref("DeptName/"+deptName+"/ConsignorValue/"+selClientName);
+            const consignEle = document.getElementById("sel_consignor");
+            consignEle.replaceChildren();
+            clientValue.get().then((snapshot)=>{
+                const snapValue = snapshot.val();
+                console.log(snapValue);
+                const consignValue = Object.keys(snapValue);
+                for(let cC in consignValue){
+                    const opC = document.createElement("option");
+                    opC.value=consignValue[cC];
+                    opC.text = consignValue[cC];
+                    consignEle.appendChild(opC);
+                }
+            })
+
+        }
+        
+    </script>
+    
+    
+    
+</body>
+</html>
